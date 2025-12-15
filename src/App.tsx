@@ -1,18 +1,78 @@
-import { useState, Suspense } from 'react'
-import { Scene } from './components/Scene'
+import { useState, Suspense, useEffect } from 'react'
+import { Game } from './components/Game'
 import { WrapSelector } from './components/WrapSelector'
 import { LoadingOverlay } from './components/LoadingOverlay'
 import { Header } from './components/Header'
 
+const STORAGE_KEY = 'tesla-wrap-viewer-custom-wraps'
+
+interface CustomWrap {
+  id: string
+  name: string
+  dataUrl: string
+}
+
 function App() {
   const [wrapTexture, setWrapTexture] = useState<string | null>(null)
   const [solidColor, setSolidColor] = useState<string | null>('#e8e8e8') // Pearl White default
+  const [customWraps, setCustomWraps] = useState<CustomWrap[]>([])
+
+  // Load custom wraps from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const wraps = JSON.parse(stored) as CustomWrap[]
+        setCustomWraps(wraps)
+      }
+    } catch (error) {
+      console.error('Failed to load custom wraps:', error)
+    }
+  }, [])
+
+  // Save custom wraps to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(customWraps))
+    } catch (error) {
+      console.error('Failed to save custom wraps:', error)
+    }
+  }, [customWraps])
+
+  const handleAddCustomWrap = (wrap: CustomWrap) => {
+    setCustomWraps(prev => [...prev, wrap])
+  }
+
+  const handleRemoveCustomWrap = (id: string) => {
+    setCustomWraps(prev => prev.filter(w => w.id !== id))
+  }
 
   return (
     <div className="relative w-full h-full">
       {/* 3D Scene */}
       <Suspense fallback={<LoadingOverlay />}>
-        <Scene wrapTexture={wrapTexture} solidColor={solidColor} />
+        <Game
+          wrapTexture={wrapTexture}
+          solidColor={solidColor}
+          onCopyWrap={(wrap, color) => {
+            setWrapTexture(wrap)
+            setSolidColor(color)
+
+            // Check if copied wrap is a custom Data URI
+            if (wrap && wrap.startsWith('data:image')) {
+              // Check if we already have it (simple dedup by string comparison might be heavy, but safe)
+              const exists = customWraps.some(w => w.dataUrl === wrap)
+              if (!exists) {
+                const newWrap: CustomWrap = {
+                  id: `copied-${Date.now()}`,
+                  name: `Copied Wrap ${new Date().toLocaleTimeString()}`,
+                  dataUrl: wrap
+                }
+                handleAddCustomWrap(newWrap)
+              }
+            }
+          }}
+        />
       </Suspense>
 
       {/* UI Overlays */}
@@ -22,6 +82,9 @@ function App() {
         onSelectColor={setSolidColor}
         currentWrap={wrapTexture}
         currentColor={solidColor}
+        customWraps={customWraps}
+        onAddCustomWrap={handleAddCustomWrap}
+        onRemoveCustomWrap={handleRemoveCustomWrap}
       />
 
     </div>

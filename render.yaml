@@ -1,0 +1,12 @@
+services:
+  # Web Service to run the backend and serve the frontend
+  - type: web
+    name: tesla-wrap-viewer
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build && cd server && npm install
+    startCommand: cd server && node index.js
+    envVars:
+      - key: PORT
+        value: 10000
+    autoDeploy: false

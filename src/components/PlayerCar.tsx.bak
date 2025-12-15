@@ -1,0 +1,196 @@
+import { useRef, useState, useEffect } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { RigidBody, RapierRigidBody, CuboidCollider } from '@react-three/rapier'
+import * as THREE from 'three'
+import { CarModel } from './CarModel'
+import { useCameraRig } from '../hooks/useCameraRig'
+
+interface PlayerCarProps {
+    wrapTexture: string | null
+    solidColor: string | null
+    onPositionUpdate: (pos: { position: THREE.Vector3, rotation: THREE.Quaternion, velocity: THREE.Vector3 }) => void
+}
+
+export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate }: PlayerCarProps) {
+    const rigidBodyRef = useRef<RapierRigidBody>(null)
+    const [keys, setKeys] = useState({ w: false, a: false, s: false, d: false })
+
+    // Input listeners
+    useFrame(() => {
+        // Poll keys (or use useEffect for listeners, but polling assumes external state or we add listeners once)
+        // Let's just add listeners in useEffect for cleaner approach
+    })
+
+    // Simple input handling
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'w' || e.key === 'ArrowUp') setKeys(k => ({ ...k, w: true }));
+            if (e.key === 's' || e.key === 'ArrowDown') setKeys(k => ({ ...k, s: true }));
+            if (e.key === 'a' || e.key === 'ArrowLeft') setKeys(k => ({ ...k, a: true }));
+            if (e.key === 'd' || e.key === 'ArrowRight') setKeys(k => ({ ...k, d: true }));
+        }
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'w' || e.key === 'ArrowUp') setKeys(k => ({ ...k, w: false }));
+            if (e.key === 's' || e.key === 'ArrowDown') setKeys(k => ({ ...k, s: false }));
+            if (e.key === 'a' || e.key === 'ArrowLeft') setKeys(k => ({ ...k, a: false }));
+            if (e.key === 'd' || e.key === 'ArrowRight') setKeys(k => ({ ...k, d: false }));
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        window.addEventListener('keyup', handleKeyUp)
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown)
+            window.removeEventListener('keyup', handleKeyUp)
+        }
+    }, [])
+
+    // Priority 1 ensures this runs AFTER physics updates (assuming physics runs at default 0 or internal step)
+    // This fixes the 1-frame lag/jitter "shake" when using rigid attachment.
+    useFrame((state) => {
+        if (!rigidBodyRef.current) return;
+
+        const impulse = { x: 0, y: 0, z: 0 };
+        const torque = { x: 0, y: 0, z: 0 };
+        const impulseStrength = 10;
+        const torqueStrength = 8;
+
+        const rot = rigidBodyRef.current.rotation();
+        const quat = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w);
+        const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(quat);
+
+        // --- Camera & Controls State Calculation ---
+        const carPos = rigidBodyRef.current.translation();
+        const carPosVec = new THREE.Vector3(carPos.x, carPos.y, carPos.z);
+
+        // Respawn if fallen off world
+        if (carPos.y < -20) {
+            rigidBodyRef.current.setTranslation({ x: 0, y: 5, z: 0 }, true);
+            rigidBodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+            rigidBodyRef.current.setAngvel({ x: 0, y: 0, z: 0 }, true);
+            return;
+        }
+
+        const isDrivingInput = keys.w || keys.s;
+        const isAction = keys.w;
+        const isReverse = keys.s;
+
+        const { targetOffset, targetLookAt, targetFov } = useCameraRig(
+            carPosVec,
+            quat,
+            isDrivingInput,
+            isAction,
+            isReverse
+        );
+
+        // --- Zoom-then-Drive Logic ---
+        let applyForce = true;
+        const speed = rigidBodyRef.current.linvel().x ** 2 + rigidBodyRef.current.linvel().y ** 2 + rigidBodyRef.current.linvel().z ** 2;
+
+        if (isDrivingInput && speed < 1.0) {
+            // Only blocks start-from-stop.
+            // Check if current FOV is close to the TARGET FOV (whatever that is for current mode)
+            if (state.camera instanceof THREE.PerspectiveCamera) {
+                // If we are far from target FOV, wait.
+                if (Math.abs(state.camera.fov - targetFov) > 2) {
+                    applyForce = false;
+                }
+            }
+        }
+
+        // --- Physics Application ---
+        // Limit Top Speed
+        const maxSpeed = 25;
+        const currentSpeed = speed; // reuse calc
+
+        let shouldApply = true;
+        if (currentSpeed > maxSpeed ** 2) {
+            const vel = rigidBodyRef.current.linvel();
+            const velVec = new THREE.Vector3(vel.x, vel.y, vel.z);
+
+            // Forward vector is +Z. W applies force in -Z direction.
+            // So "Moving Forward" means velocity is in -Z direction (dot product < 0).
+            const isMovingForward = velVec.dot(forward) < 0;
+            const isReversing = velVec.dot(forward) > 0;
+
+            // If W (Accelerate Forward) AND Already Moving Forward, Block.
+            if (keys.w && isMovingForward) shouldApply = false;
+
+            // If S (Accelerate Backward) AND Already Reversing, Block.
+            if (keys.s && isReversing) shouldApply = false;
+        }
+
+        if (applyForce && shouldApply) {
+            if (keys.w) {
+                impulse.x -= forward.x * impulseStrength;
+                impulse.z -= forward.z * impulseStrength;
+            }
+            if (keys.s) {
+                impulse.x += forward.x * impulseStrength;
+                impulse.z += forward.z * impulseStrength;
+            }
+        }
+
+        if (keys.a) {
+            torque.y += torqueStrength;
+        }
+        if (keys.d) {
+            torque.y -= torqueStrength;
+        }
+
+        rigidBodyRef.current.applyImpulse(impulse, true);
+        rigidBodyRef.current.applyTorqueImpulse(torque, true);
+
+        // --- Camera Update ---
+        const relativeOffset = targetOffset.clone().applyQuaternion(quat);
+        const desiredCamPos = carPosVec.clone().add(relativeOffset);
+
+        // Rigid Position for Action/Reverse to prevent lag
+        // Using Priority 1 in useFrame mostly fixes visual shake, so we can be rigid.
+        const posLerpSpeed = (isAction || isReverse) ? 1.0 : 0.05;
+        state.camera.position.lerp(desiredCamPos, posLerpSpeed);
+
+        const relativeLookAt = targetLookAt.clone().applyQuaternion(quat);
+        const desiredLookAt = carPosVec.clone().add(relativeLookAt);
+
+        if (!state.camera.userData.currentLookAt) {
+            state.camera.userData.currentLookAt = desiredLookAt.clone();
+        }
+
+        // Smoothed Rotation for aesthetics
+        const lookLerpSpeed = (isAction || isReverse) ? 0.2 : 0.05; // Slightly faster look to match rigid pos
+
+        const smoothedLookAt = state.camera.userData.currentLookAt as THREE.Vector3;
+        smoothedLookAt.lerp(desiredLookAt, lookLerpSpeed);
+        state.camera.lookAt(smoothedLookAt);
+
+        if (state.camera instanceof THREE.PerspectiveCamera) {
+            state.camera.fov = THREE.MathUtils.lerp(state.camera.fov, targetFov, 0.1);
+            state.camera.updateProjectionMatrix();
+        }
+
+        // Network Sync
+        onPositionUpdate({
+            position: carPosVec,
+            rotation: quat,
+            velocity: new THREE.Vector3().copy(rigidBodyRef.current.linvel())
+        })
+    }, 1) // <--- PRIORITY 1
+
+    return (
+        <RigidBody
+            ref={rigidBodyRef}
+            position={[0, 2, 0]}
+            colliders={false} // Use custom collider
+            linearDamping={0.5}
+            angularDamping={2}
+        >
+            <CuboidCollider args={[1, 0.5, 2.2]} position={[0, 0.5, 0]} />
+            {/* CarModel expects y=0 to be bottom of wheels. box collider center is at 0.5 */}
+            {/* Rotate model 180 to align +Z (Physics Forward) with Visual Forward */}
+            <group rotation={[0, Math.PI, 0]}>
+                <CarModel wrapTexture={wrapTexture} solidColor={solidColor} />
+            </group>
+        </RigidBody>
+    )
+}
+
+

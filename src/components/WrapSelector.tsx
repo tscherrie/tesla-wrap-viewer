@@ -13,6 +13,16 @@ interface CustomWrap {
   dataUrl: string
 }
 
+interface WrapSelectorProps {
+  onSelectWrap: (texturePath: string | null) => void
+  onSelectColor: (color: string | null) => void
+  currentWrap: string | null
+  currentColor: string | null
+  customWraps: CustomWrap[]
+  onAddCustomWrap: (wrap: CustomWrap) => void
+  onRemoveCustomWrap: (id: string) => void
+}
+
 // Tesla wrap presets from the official repo
 const PRESET_WRAPS = [
   { name: 'Cosmic Burst', file: '/wraps/Cosmic_Burst.png' },
@@ -41,35 +51,18 @@ const SOLID_COLORS = [
   { name: 'Midnight Cherry', color: '#4a1c2a' },
 ]
 
-const STORAGE_KEY = 'tesla-wrap-viewer-custom-wraps'
-
-export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, currentColor }: WrapSelectorProps) {
+export function WrapSelector({
+  onSelectWrap,
+  onSelectColor,
+  currentWrap,
+  currentColor,
+  customWraps,
+  onAddCustomWrap,
+  onRemoveCustomWrap
+}: WrapSelectorProps) {
   const [activeTab, setActiveTab] = useState<'wraps' | 'colors'>('wraps')
   const [isExpanded, setIsExpanded] = useState(true)
-  const [customWraps, setCustomWraps] = useState<CustomWrap[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Load custom wraps from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const wraps = JSON.parse(stored) as CustomWrap[]
-        setCustomWraps(wraps)
-      }
-    } catch (error) {
-      console.error('Failed to load custom wraps:', error)
-    }
-  }, [])
-
-  // Save custom wraps to localStorage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(customWraps))
-    } catch (error) {
-      console.error('Failed to save custom wraps:', error)
-    }
-  }, [customWraps])
 
   const handleWrapSelect = (wrapPath: string) => {
     // onSelectColor(null) // Do not clear color so we can layer wraps on base paint
@@ -92,12 +85,12 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
           name: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
           dataUrl: dataUrl
         }
-        
-        setCustomWraps(prev => [...prev, customWrap])
+
+        onAddCustomWrap(customWrap)
         handleWrapSelect(dataUrl)
       }
       reader.readAsDataURL(file)
-      
+
       // Reset input value so the same file can be selected again
       e.target.value = ''
     }
@@ -105,13 +98,14 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
 
   const handleDeleteCustomWrap = (id: string, e: React.MouseEvent) => {
     e.stopPropagation() // Prevent selecting the wrap when clicking delete
-    setCustomWraps(prev => prev.filter(wrap => wrap.id !== id))
-    
+
     // If the deleted wrap was currently selected, clear the selection
     const wrapToDelete = customWraps.find(w => w.id === id)
     if (wrapToDelete && currentWrap === wrapToDelete.dataUrl) {
       onSelectWrap(null)
     }
+
+    onRemoveCustomWrap(id)
   }
 
   return (
@@ -133,9 +127,8 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
 
       {/* Panel */}
       <div
-        className={`transition-all duration-300 ${
-          isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
-        }`}
+        className={`transition-all duration-300 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
+          }`}
       >
         <div className="w-72 bg-[#141416]/95 backdrop-blur-xl rounded-2xl border border-[#2a2a30] shadow-2xl overflow-hidden">
           {/* Header */}
@@ -148,21 +141,19 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
           <div className="flex border-b border-[#2a2a30]">
             <button
               onClick={() => setActiveTab('colors')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'colors'
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'colors'
                   ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
                   : 'text-[#71717a] hover:text-white'
-              }`}
+                }`}
             >
               Colors
             </button>
             <button
               onClick={() => setActiveTab('wraps')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'wraps'
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'wraps'
                   ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
                   : 'text-[#71717a] hover:text-white'
-              }`}
+                }`}
             >
               Wraps
             </button>
@@ -178,9 +169,8 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
                     <button
                       key={item.name}
                       onClick={() => handleColorSelect(item.color)}
-                      className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-105 ${
-                        currentColor === item.color ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
-                      }`}
+                      className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-105 ${currentColor === item.color ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
+                        }`}
                       title={item.name}
                     >
                       <div
@@ -230,9 +220,8 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
                         <button
                           key={wrap.id}
                           onClick={() => handleWrapSelect(wrap.dataUrl)}
-                          className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-[1.02] ${
-                            currentWrap === wrap.dataUrl ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
-                          }`}
+                          className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-[1.02] ${currentWrap === wrap.dataUrl ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
+                            }`}
                         >
                           <img
                             src={wrap.dataUrl}
@@ -265,9 +254,8 @@ export function WrapSelector({ onSelectWrap, onSelectColor, currentWrap, current
                     <button
                       key={wrap.name}
                       onClick={() => handleWrapSelect(wrap.file)}
-                      className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-[1.02] ${
-                        currentWrap === wrap.file ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
-                      }`}
+                      className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-[1.02] ${currentWrap === wrap.file ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
+                        }`}
                     >
                       <img
                         src={wrap.file}
