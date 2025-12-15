@@ -1,5 +1,4 @@
-import { Vector3, Quaternion } from 'three'
-import { useState, useRef, useEffect } from 'react'
+import { Vector3 } from 'three'
 
 export type CameraMode = 'IDLE' | 'DRIVING' | 'ACTION' | 'REVERSE'
 
@@ -10,7 +9,6 @@ interface CameraConfig {
 }
 
 const CONFIGS: Record<CameraMode, CameraConfig> = {
-    // High bird's eye view
     // High bird's eye view
     IDLE: {
         offset: new Vector3(0, 12, -12), // -Z is Behind (High Angle)
@@ -38,8 +36,6 @@ const CONFIGS: Record<CameraMode, CameraConfig> = {
 }
 
 export function useCameraRig(
-    carPosition: Vector3,
-    carRotation: Quaternion,
     isDriving: boolean,
     isAction: boolean,
     isReverse: boolean

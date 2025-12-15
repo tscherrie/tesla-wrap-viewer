@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { CarModel } from './CarModel'
@@ -8,12 +8,13 @@ interface RemoteCarProps {
     id: string
     position: { x: number, y: number, z: number }
     rotation: { x: number, y: number, z: number, w: number }
+    velocity: { x: number, y: number, z: number }
     color: string | null
     wrapTexture: string | null
     onClick: (id: string) => void
 }
 
-export function RemoteCar({ id, position, rotation, color, wrapTexture, onClick }: RemoteCarProps) {
+export function RemoteCar({ id, position, rotation, velocity, color, wrapTexture, onClick }: RemoteCarProps) {
     const groupRef = useRef<THREE.Group>(null)
 
     useFrame(() => {
@@ -38,7 +39,9 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, onClick 
                 onClick(id)
             }}
         >
-            <CarModel wrapTexture={wrapTexture} solidColor={color} />
+            <Suspense fallback={null}>
+                <CarModel wrapTexture={wrapTexture} solidColor={color} />
+            </Suspense>
             <Html position={[0, 2, 0]} center>
                 <div className="bg-black/50 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
                     Player {id.slice(0, 4)}

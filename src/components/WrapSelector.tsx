@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useState } from 'react'
 
-interface WrapSelectorProps {
-  onSelectWrap: (texturePath: string | null) => void
+onSelectWrap: (texturePath: string | null) => void
   onSelectColor: (color: string | null) => void
-  currentWrap: string | null
-  currentColor: string | null
+    currentWrap: string | null
+currentColor: string | null
 }
 
 interface CustomWrap {
@@ -81,7 +80,7 @@ export function WrapSelector({
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string
         const customWrap: CustomWrap = {
-          id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: `custom - ${Date.now()} -${Math.random().toString(36).substr(2, 9)} `,
           name: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
           dataUrl: dataUrl
         }
@@ -116,7 +115,7 @@ export function WrapSelector({
         className="absolute -left-12 top-0 w-10 h-10 rounded-full bg-[#1e1e22]/90 backdrop-blur-xl border border-[#3d3d45]/50 flex items-center justify-center text-white/70 hover:text-white hover:border-[#52525b] transition-all"
       >
         <svg
-          className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-0' : 'rotate-180'}`}
+          className={`w - 5 h - 5 transition - transform ${isExpanded ? 'rotate-0' : 'rotate-180'} `}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -127,8 +126,8 @@ export function WrapSelector({
 
       {/* Panel */}
       <div
-        className={`transition-all duration-300 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
-          }`}
+        className={`transition - all duration - 300 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
+          } `}
       >
         <div className="w-72 bg-[#141416]/95 backdrop-blur-xl rounded-2xl border border-[#2a2a30] shadow-2xl overflow-hidden">
           {/* Header */}
@@ -141,19 +140,19 @@ export function WrapSelector({
           <div className="flex border-b border-[#2a2a30]">
             <button
               onClick={() => setActiveTab('colors')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'colors'
+              className={`flex - 1 py - 3 text - sm font - medium transition - colors ${activeTab === 'colors'
                   ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
                   : 'text-[#71717a] hover:text-white'
-                }`}
+                } `}
             >
               Colors
             </button>
             <button
               onClick={() => setActiveTab('wraps')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'wraps'
+              className={`flex - 1 py - 3 text - sm font - medium transition - colors ${activeTab === 'wraps'
                   ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
                   : 'text-[#71717a] hover:text-white'
-                }`}
+                } `}
             >
               Wraps
             </button>
@@ -169,8 +168,8 @@ export function WrapSelector({
                     <button
                       key={item.name}
                       onClick={() => handleColorSelect(item.color)}
-                      className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-105 ${currentColor === item.color ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
-                        }`}
+                      className={`group relative aspect - square rounded - xl overflow - hidden transition - all hover: scale - 105 ${currentColor === item.color ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
+                        } `}
                       title={item.name}
                     >
                       <div
@@ -220,8 +219,8 @@ export function WrapSelector({
                         <button
                           key={wrap.id}
                           onClick={() => handleWrapSelect(wrap.dataUrl)}
-                          className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-[1.02] ${currentWrap === wrap.dataUrl ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
-                            }`}
+                          className={`group relative aspect - square rounded - xl overflow - hidden transition - all hover: scale - [1.02] ${currentWrap === wrap.dataUrl ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
+                            } `}
                         >
                           <img
                             src={wrap.dataUrl}
@@ -254,8 +253,8 @@ export function WrapSelector({
                     <button
                       key={wrap.name}
                       onClick={() => handleWrapSelect(wrap.file)}
-                      className={`group relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-[1.02] ${currentWrap === wrap.file ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
-                        }`}
+                      className={`group relative aspect - square rounded - xl overflow - hidden transition - all hover: scale - [1.02] ${currentWrap === wrap.file ? 'ring-2 ring-[#e82127] ring-offset-2 ring-offset-[#141416]' : ''
+                        } `}
                     >
                       <img
                         src={wrap.file}

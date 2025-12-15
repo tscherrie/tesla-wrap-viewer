@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RigidBody, RapierRigidBody, CuboidCollider } from '@react-three/rapier'
 import * as THREE from 'three'
@@ -57,7 +57,7 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
 
         const impulse = { x: 0, y: 0, z: 0 };
         const torque = { x: 0, y: 0, z: 0 };
-        const impulseStrength = 5; // Much lower acceleration for smooth control (was 20)
+        const impulseStrength = 10; // Much lower acceleration for smooth control (was 20)
         const baseTorqueStrength = 8; // Reduced for fine control (was 15)
 
         const rot = rigidBodyRef.current.rotation();
@@ -68,7 +68,7 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
         let applyForce = true;
 
         // Limit Top Speed
-        const maxSpeed = 8; // Very slow, parking lot speed (approx 30km/h)
+        const maxSpeed = 20; // Very slow, parking lot speed (approx 30km/h)
         const currentSpeed = rigidBodyRef.current.linvel().x ** 2 + rigidBodyRef.current.linvel().y ** 2 + rigidBodyRef.current.linvel().z ** 2;
 
         // Only apply impulse if below max speed, OR if impulse opposes velocity (breaking/reversing)
@@ -207,8 +207,6 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
         }
 
         const { targetOffset, targetLookAt, targetFov } = useCameraRig(
-            carPosVec,
-            carQuat,
             inDrivingPeriod, // isDriving main flag
             effectiveIsAction,
             effectiveIsReverse
@@ -308,7 +306,9 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
             {/* CarModel expects y=0 to be bottom of wheels. box collider center is at 0.5 */}
             {/* Rotate model 180 to align +Z (Physics Forward) with Visual Forward */}
             <group ref={visualMeshRef} rotation={[0, Math.PI, 0]}>
-                <CarModel wrapTexture={wrapTexture} solidColor={solidColor} />
+                <Suspense fallback={null}>
+                    <CarModel wrapTexture={wrapTexture} solidColor={solidColor} />
+                </Suspense>
             </group>
 
             {/* Orbit Controls for Idle Mode - enabled controlled in useFrame */}
