@@ -24,11 +24,6 @@ function App() {
         currentColor={solidColor}
       />
 
-      {/* Bottom info */}
-      <div className="absolute bottom-4 left-4 text-[#52525b] text-xs">
-        <p>Note: STL model uses generated UVs. For accurate wrap preview,</p>
-        <p>use a UV-mapped GLB/GLTF model matching the Tesla template.</p>
-      </div>
     </div>
   )
 }

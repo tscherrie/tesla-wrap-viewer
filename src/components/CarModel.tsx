@@ -1,6 +1,5 @@
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useLoader } from '@react-three/fiber'
-import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
@@ -169,107 +168,47 @@ function SolidColorCar({ object, color }: { object: THREE.Object3D, color: strin
 }
 
 export function CarModel({ wrapTexture, solidColor }: CarModelProps) {
-  const [modelType, setModelType] = useState<'glb' | 'stl'>('stl')
-  
-  // Try to load GLB first
-  const gltf = useLoader(GLTFLoader, '/models/model3.glb', (loader) => {
-    // Error handler: if GLB fails, we fallback to STL
-    loader.manager.onError = () => {
-      console.log('GLB model not found, falling back to STL')
-      setModelType('stl')
-    }
-  })
-
-  // Load STL as fallback
-  const stlGeometry = useLoader(STLLoader, '/models/3dmodel.stl')
+  // Load GLB model
+  const gltf = useLoader(GLTFLoader, '/models/model3.glb')
   
   const processedModel = useMemo(() => {
-    if (gltf && gltf.scene) {
-      // Process GLB model
-      const model = gltf.scene.clone()
-      
-      // Log material names to help identify parts
-      console.log('Model Materials:')
-      model.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const mat = child.material as THREE.MeshStandardMaterial
-          console.log(`- Mesh: "${child.name}", Material: "${mat.name}"`)
-        }
-      })
-      
-      // Compute bounding box
-      const box = new THREE.Box3().setFromObject(model)
-      const size = new THREE.Vector3()
-      box.getSize(size)
-      const maxDim = Math.max(size.x, size.y, size.z)
-      
-      // Normalize scale to ~4.5 units
-      const scale = 4.5 / maxDim
-      model.scale.set(scale, scale, scale)
-      
-      // Center and ground
-      const scaledBox = new THREE.Box3().setFromObject(model)
-      const center = new THREE.Vector3()
-      scaledBox.getCenter(center)
-      
-      model.position.x += -center.x
-      model.position.z += -center.z
-      model.position.y = -scaledBox.min.y
-      
-      return { type: 'glb', object: model }
-    } else {
-      // Process STL geometry (fallback)
-      const geo = stlGeometry.clone()
-      
-      // ... existing STL processing logic ...
-      // Rotate geometry from Z-up (CAD) to Y-up
-      geo.rotateX(-Math.PI / 2)
-      
-      // Center
-      geo.computeBoundingBox()
-      const box = geo.boundingBox!
-      const center = new THREE.Vector3()
-      box.getCenter(center)
-      geo.translate(-center.x, -center.y, -center.z)
-      
-      // Scale
-      const size = new THREE.Vector3()
-      box.getSize(size)
-      const maxDim = Math.max(size.x, size.y, size.z)
-      const scale = 3 / maxDim
-      geo.scale(scale, scale, scale)
-      
-      // Ground alignment
-      geo.computeBoundingBox()
-      const newBox = geo.boundingBox!
-      geo.translate(0, -newBox.min.y, 0)
-      
-      // Normals
-      geo.computeVertexNormals()
-      
-      // Planar UVs (Top-down)
-      const positions = geo.attributes.position
-      const uvs = new Float32Array(positions.count * 2)
-      
-      const boxBounds = new THREE.Box3().setFromBufferAttribute(positions)
-      const sizeBounds = new THREE.Vector3()
-      boxBounds.getSize(sizeBounds)
-      const minBounds = boxBounds.min
-      
-      for (let i = 0; i < positions.count; i++) {
-        const x = positions.getX(i)
-        const z = positions.getZ(i)
-        const u = (x - minBounds.x) / sizeBounds.x
-        const v = 1 - (z - minBounds.z) / sizeBounds.z
-        uvs[i * 2] = u
-        uvs[i * 2 + 1] = v
-      }
-      geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2))
-      
-      const mesh = new THREE.Mesh(geo)
-      return { type: 'stl', object: mesh }
+    if (!gltf?.scene) {
+      throw new Error('Failed to load GLB model')
     }
-  }, [gltf, stlGeometry])
+    
+    // Process GLB model
+    const model = gltf.scene.clone()
+    
+    // Log material names to help identify parts
+    console.log('Model Materials:')
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const mat = child.material as THREE.MeshStandardMaterial
+        console.log(`- Mesh: "${child.name}", Material: "${mat.name}"`)
+      }
+    })
+    
+    // Compute bounding box
+    const box = new THREE.Box3().setFromObject(model)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const maxDim = Math.max(size.x, size.y, size.z)
+    
+    // Normalize scale to ~4.5 units
+    const scale = 4.5 / maxDim
+    model.scale.set(scale, scale, scale)
+    
+    // Center and ground
+    const scaledBox = new THREE.Box3().setFromObject(model)
+    const center = new THREE.Vector3()
+    scaledBox.getCenter(center)
+    
+    model.position.x += -center.x
+    model.position.z += -center.z
+    model.position.y = -scaledBox.min.y
+    
+    return { object: model }
+  }, [gltf])
 
   const defaultColor = '#2a2a30'
 
