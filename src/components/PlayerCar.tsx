@@ -52,13 +52,19 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
         }
     }, [])
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         if (!rigidBodyRef.current) return;
+
+        // Frame-rate correction factor (assuming 60fps target)
+        // If fps drops (delta increases), we apply more force per frame to maintain constant acceleration over time.
+        const timeScale = delta * 60;
 
         const impulse = { x: 0, y: 0, z: 0 };
         const torque = { x: 0, y: 0, z: 0 };
-        const impulseStrength = 10; // Much lower acceleration for smooth control (was 20)
-        const baseTorqueStrength = 8; // Reduced for fine control (was 15)
+
+        // Base strengths tuned for 60fps
+        const impulseStrength = 10 * timeScale;
+        const baseTorqueStrength = 8 * timeScale;
 
         const rot = rigidBodyRef.current.rotation();
         const quat = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w);
