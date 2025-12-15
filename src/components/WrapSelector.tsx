@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 
-onSelectWrap: (texturePath: string | null) => void
+interface WrapSelectorProps {
+  onSelectWrap: (texturePath: string | null) => void
   onSelectColor: (color: string | null) => void
-    currentWrap: string | null
-currentColor: string | null
+  currentWrap: string | null
+  currentColor: string | null
 }
 
 interface CustomWrap {
