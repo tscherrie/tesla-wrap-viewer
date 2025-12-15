@@ -135,10 +135,22 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
         <div className="w-full h-full relative">
             <ChatBox socket={socket} />
             {/* 3D Scene */}
-            <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
+            {/* PERFORMANCE: Cap dpr at 1.5 to prevent massive lag on Retina/High-DPI screens */}
+            <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 5, 10], fov: 50 }}>
                 <Suspense fallback={null}>
-                    <ambientLight intensity={0.5} />
-                    <directionalLight position={[100, 100, 50]} intensity={1} castShadow />
+                    {/* LIGHTING ENHANCEMENTS */}
+                    {/* PBR Reflections - Key for "Tesla" look */}
+                    <Environment preset="city" />
+
+                    {/* Brighter base lighting */}
+                    <ambientLight intensity={1.5} />
+                    {/* Key light for shadows */}
+                    <directionalLight
+                        position={[100, 100, 50]}
+                        intensity={2}
+                        castShadow
+                        shadow-mapSize={[1024, 1024]}
+                    />
 
                     <Physics interpolate={true} timeStep={1 / 60}>
                         <GameWorld />
@@ -162,7 +174,7 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
                         ))}
                     </Physics>
 
-                    {/* Environment/Sky */}
+                    {/* Environment/Sky - Keep matching background */}
                     <color attach="background" args={['#87CEEB']} />
                     <fog attach="fog" args={['#87CEEB', 30, 200]} />
                 </Suspense>
