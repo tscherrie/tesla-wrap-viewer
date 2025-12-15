@@ -141,8 +141,8 @@ export function WrapSelector({
             <button
               onClick={() => setActiveTab('colors')}
               className={`flex - 1 py - 3 text - sm font - medium transition - colors ${activeTab === 'colors'
-                  ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
-                  : 'text-[#71717a] hover:text-white'
+                ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
+                : 'text-[#71717a] hover:text-white'
                 } `}
             >
               Colors
@@ -150,8 +150,8 @@ export function WrapSelector({
             <button
               onClick={() => setActiveTab('wraps')}
               className={`flex - 1 py - 3 text - sm font - medium transition - colors ${activeTab === 'wraps'
-                  ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
-                  : 'text-[#71717a] hover:text-white'
+                ? 'text-white bg-[#1e1e22] border-b-2 border-[#e82127]'
+                : 'text-[#71717a] hover:text-white'
                 } `}
             >
               Wraps
