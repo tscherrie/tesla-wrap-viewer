@@ -14,7 +14,7 @@ interface RemoteCarProps {
     onClick: (id: string) => void
 }
 
-export function RemoteCar({ id, position, rotation, velocity, color, wrapTexture, onClick }: RemoteCarProps) {
+export function RemoteCar({ id, position, rotation, color, wrapTexture, onClick }: RemoteCarProps) {
     const groupRef = useRef<THREE.Group>(null)
 
     useFrame(() => {

@@ -155,7 +155,7 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
                                 position={car.position}
                                 rotation={car.rotation}
                                 velocity={car.velocity}
-                                solidColor={car.color}
+                                color={car.color}
                                 wrapTexture={car.wrapTexture}
                                 onClick={handleCarClick}
                             />
