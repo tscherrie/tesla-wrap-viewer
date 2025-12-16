@@ -310,8 +310,15 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
             colliders={false} // Use custom collider
             linearDamping={1.0}
             angularDamping={8}
+            restitution={1.1}
+            friction={0.4}
         >
-            <CuboidCollider args={[1, 0.5, 2.2]} position={[0, 0.5, 0]} />
+            <CuboidCollider
+                args={[1, 0.5, 2.2]}
+                position={[0, 0.5, 0]}
+                restitution={1.1}
+                friction={0.4}
+            />
             {/* CarModel expects y=0 to be bottom of wheels. box collider center is at 0.5 */}
             {/* Rotate model 180 to align +Z (Physics Forward) with Visual Forward */}
             <group ref={visualMeshRef} rotation={[0, Math.PI, 0]}>

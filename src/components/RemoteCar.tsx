@@ -32,8 +32,15 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, displayN
             type="kinematicPosition"
             colliders={false}
             position={[position.x, position.y, position.z]}
+            restitution={1.1}
+            friction={0.4}
         >
-            <CuboidCollider args={[1, 0.5, 2.2]} position={[0, 0.5, 0]} />
+            <CuboidCollider
+                args={[1, 0.5, 2.2]}
+                position={[0, 0.5, 0]}
+                restitution={1.1}
+                friction={0.4}
+            />
             <group
                 onPointerDown={(e) => {
                     e.stopPropagation()
