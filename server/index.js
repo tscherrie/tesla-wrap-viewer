@@ -23,6 +23,15 @@ const io = new Server(httpServer, {
   maxHttpBufferSize: 1e7 // Increase payload limit to 10MB for base64 images
 });
 
+const uniqueIps = new Set();
+
+function getIp(socket) {
+  const xfwd = socket.handshake?.headers?.['x-forwarded-for'];
+  if (xfwd && typeof xfwd === 'string') return xfwd.split(',')[0].trim();
+  if (Array.isArray(xfwd) && xfwd.length) return xfwd[0];
+  return socket.handshake?.address || 'unknown';
+}
+
 // Game State
 const players = {};
 // Structure: 
@@ -38,7 +47,9 @@ const players = {};
 // }
 
 io.on('connection', (socket) => {
-  console.log(`Player connected: ${socket.id}`);
+  const ip = getIp(socket);
+  if (!uniqueIps.has(ip)) uniqueIps.add(ip);
+  console.log(`Player connected: ${socket.id} from ${ip} (unique IPs: ${uniqueIps.size})`);
 
   // Initialize new player
   // We wait for them to send 'join' with their initial customization
@@ -58,7 +69,7 @@ io.on('connection', (socket) => {
     // Send existing players to new player
     socket.emit('current-players', players);
 
-    console.log(`Player joined game: ${socket.id}`);
+    console.log(`Player joined game: ${socket.id} from ${ip} (unique IPs: ${uniqueIps.size})`);
   });
 
   socket.on('update-state', (physicsState) => {
