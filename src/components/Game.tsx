@@ -39,7 +39,7 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
     const [activeChatTarget, setActiveChatTarget] = useState<string | null>(null)
 
-    const MAX_CHAT_DISTANCE = 5 // meters in world units
+    const MAX_CHAT_DISTANCE = 20 // meters in world units
 
 
     useEffect(() => {
