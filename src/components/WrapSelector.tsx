@@ -159,12 +159,19 @@ export function WrapSelector({
                     <li className="flex gap-3">
                       <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">2</div>
                       <div>
+                        <div className="font-semibold text-white">Optional: download the UV template</div>
+                        <p className="text-[#cbd5e1]">Design by hand? Grab <a href="/wraps/template.png" className="text-[#7dd3fc] hover:text-white underline" download>template.png</a> and paint directly on the UV map.</p>
+                      </div>
+                    </li>
+                    <li className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">3</div>
+                      <div>
                         <div className="font-semibold text-white">Download the generated image</div>
                         <p className="text-[#cbd5e1]">Save the PNG/JPEG to your device.</p>
                       </div>
                     </li>
                     <li className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">3</div>
+                      <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">4</div>
                       <div>
                         <div className="font-semibold text-white">Upload to Wrap Studio</div>
                         <p className="text-[#cbd5e1]">Click “Upload custom wrap” and select your file. It appears in “Your Custom Wraps” and auto-applies to the car.</p>
