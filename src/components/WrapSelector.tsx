@@ -25,10 +25,8 @@ const sanitizeName = (raw: string) => {
 }
 
 const fileNameForDownload = (wrap: CustomWrap) => {
-  const base = sanitizeName(wrap.name)
-  const suffix = wrap.id.replace(/[^a-zA-Z0-9]/g, '').slice(-4) || 'wrap'
-  let composed = `${base}-${suffix}-wrap`.replace(/-+/g, '-')
-  composed = composed.slice(0, 25) // ensure room for ".png" to stay under 30 chars
+  const suffix = wrap.id.replace(/[^a-zA-Z0-9]/g, '').slice(-6) || 'wrap'
+  const composed = `wrap-${suffix}`.slice(0, 24) // leave room for .png (max 30 chars)
   return `${composed}.png`
 }
 
