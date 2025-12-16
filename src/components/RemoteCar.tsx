@@ -1,8 +1,8 @@
 import { useRef, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
 import { CarModel } from './CarModel'
 import { Html } from '@react-three/drei'
+import { RigidBody, CuboidCollider, RapierRigidBody } from '@react-three/rapier'
 
 interface RemoteCarProps {
     id: string
@@ -18,51 +18,50 @@ interface RemoteCarProps {
 }
 
 export function RemoteCar({ id, position, rotation, color, wrapTexture, displayName, selected, onSelect, onCopy }: RemoteCarProps) {
-    const groupRef = useRef<THREE.Group>(null)
+    const bodyRef = useRef<RapierRigidBody>(null)
 
     useFrame(() => {
-        if (!groupRef.current) return
-
-        // Linear interpolation for smooth movement
-        const currentPos = groupRef.current.position
-        const targetPos = new THREE.Vector3(position.x, position.y, position.z)
-        currentPos.lerp(targetPos, 0.1)
-
-        const currentRot = groupRef.current.quaternion
-        const targetRot = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w)
-        currentRot.slerp(targetRot, 0.1)
+        if (!bodyRef.current) return
+        bodyRef.current.setNextKinematicTranslation({ x: position.x, y: position.y, z: position.z })
+        bodyRef.current.setNextKinematicRotation({ x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w })
     })
 
     return (
-        <group
-            ref={groupRef}
+        <RigidBody
+            ref={bodyRef}
+            type="kinematicPosition"
+            colliders={false}
             position={[position.x, position.y, position.z]}
-            onClick={(e) => {
-                e.stopPropagation()
-                onSelect(id)
-            }}
         >
-            <Suspense fallback={null}>
-                <CarModel wrapTexture={wrapTexture} solidColor={color} />
-            </Suspense>
-            <Html position={[0, 2, 0]} center style={{ zIndex: 200, pointerEvents: 'none' }}>
-                <div className="bg-black/50 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
-                    {displayName || `Player ${id.slice(0, 4)}`}
-                </div>
-            </Html>
-            {selected && (
-                <Html position={[0, 3, 0]} center style={{ zIndex: 300 }}>
-                    <button
-                        className="bg-[#e82127] hover:bg-[#ff2b33] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg shadow-[#e82127]/30"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onCopy(id)
-                        }}
-                    >
-                        Copy Wrap
-                    </button>
+            <CuboidCollider args={[1, 0.5, 2.2]} position={[0, 0.5, 0]} />
+            <group
+                onPointerDown={(e) => {
+                    e.stopPropagation()
+                    onSelect(id)
+                }}
+            >
+                <Suspense fallback={null}>
+                    <CarModel wrapTexture={wrapTexture} solidColor={color} />
+                </Suspense>
+                <Html position={[0, 2, 0]} center style={{ zIndex: 200, pointerEvents: 'none' }}>
+                    <div className="bg-black/50 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
+                        {displayName || `Player ${id.slice(0, 4)}`}
+                    </div>
                 </Html>
-            )}
-        </group>
+                {selected && (
+                    <Html position={[0, 3, 0]} center style={{ zIndex: 300 }}>
+                        <button
+                            className="bg-[#e82127] hover:bg-[#ff2b33] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg shadow-[#e82127]/30"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onCopy(id)
+                            }}
+                        >
+                            Copy Wrap
+                        </button>
+                    </Html>
+                )}
+            </group>
+        </RigidBody>
     )
 }
