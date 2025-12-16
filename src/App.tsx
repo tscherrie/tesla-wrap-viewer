@@ -99,24 +99,24 @@ function App() {
     }
   }, [isNight])
 
-  // Auto-set theme based on local sunrise/sunset (best effort)
+  // Auto-set theme based on IP-derived location sunrise/sunset (no permission prompt)
   useEffect(() => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const { latitude, longitude } = pos.coords
-      const url = `https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status !== 'OK') return
-          const now = Date.now()
-          const sunrise = new Date(data.results.sunrise).getTime()
-          const sunset = new Date(data.results.sunset).getTime()
-          const night = now < sunrise || now > sunset
-          setIsNight(night)
-        })
-        .catch(() => { /* ignore */ })
-    }, () => { /* ignore permission errors */ })
+    const detect = async () => {
+      try {
+        const ipInfo = await fetch('https://ipapi.co/json/').then(r => r.json())
+        if (!ipInfo || !ipInfo.latitude || !ipInfo.longitude) return
+        const url = `https://api.sunrise-sunset.org/json?lat=${ipInfo.latitude}&lng=${ipInfo.longitude}&formatted=0`
+        const data = await fetch(url).then(r => r.json())
+        if (data.status !== 'OK') return
+        const now = Date.now()
+        const sunrise = new Date(data.results.sunrise).getTime()
+        const sunset = new Date(data.results.sunset).getTime()
+        setIsNight(now < sunrise || now > sunset)
+      } catch {
+        // ignore failures
+      }
+    }
+    detect()
   }, [])
 
   const handleAddCustomWrap = (wrap: CustomWrap) => {
