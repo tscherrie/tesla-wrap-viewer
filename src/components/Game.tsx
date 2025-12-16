@@ -261,7 +261,10 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
                 <ChatBox
                     socket={socket}
                     targetId={activeChatTarget}
-                    targetLabel={players[activeChatTarget] ? `Player ${players[activeChatTarget].id.slice(0, 4)}` : undefined}
+                    targetLabel={
+                        players[activeChatTarget]?.displayName
+                        || (players[activeChatTarget] ? `Player ${players[activeChatTarget].id.slice(0, 4)}` : undefined)
+                    }
                     onClose={() => setActiveChatTarget(null)}
                 />
             )}
