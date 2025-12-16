@@ -34,7 +34,6 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
     const [socket, setSocket] = useState<Socket | null>(null)
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
     const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
-    const worldPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
     const [cityOffset, setCityOffset] = useState<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
     const [worldLoaded, setWorldLoaded] = useState(false)
 
@@ -171,11 +170,6 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
                 y: state.position.y - cityOffset.y,
                 z: state.position.z - cityOffset.z
             }
-            worldPlayerPosition.current = {
-                x: state.position.x,
-                y: state.position.y,
-                z: state.position.z
-            }
         }
 
         // Auto-close chat if the target moves out of range
@@ -300,11 +294,7 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
                     />
 
                     <Physics interpolate={true} timeStep={1 / 60}>
-                        <GameWorld
-                            onOffset={setCityOffset}
-                            onLoaded={() => setWorldLoaded(true)}
-                            playerPosition={worldPlayerPosition.current}
-                        />
+                        <GameWorld onOffset={setCityOffset} onLoaded={() => setWorldLoaded(true)} />
                         <PlayerCar
                             wrapTexture={wrapTexture}
                             solidColor={solidColor}
