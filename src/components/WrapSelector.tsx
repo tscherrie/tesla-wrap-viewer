@@ -24,9 +24,11 @@ const sanitizeName = (raw: string) => {
   return base.length ? base : 'wrap'
 }
 
-const fileNameForDownload = (raw: string) => {
-  const base = sanitizeName(raw)
-  const composed = `${base}-wrap`.slice(0, 25) // ensure total <=30 with .png
+const fileNameForDownload = (wrap: CustomWrap) => {
+  const base = sanitizeName(wrap.name)
+  const suffix = wrap.id.replace(/[^a-zA-Z0-9]/g, '').slice(-4) || 'wrap'
+  let composed = `${base}-${suffix}-wrap`.replace(/-+/g, '-')
+  composed = composed.slice(0, 25) // ensure room for ".png" to stay under 30 chars
   return `${composed}.png`
 }
 
@@ -122,7 +124,7 @@ export function WrapSelector({
   const handleDownloadCustomWrap = async (wrap: CustomWrap, e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
     try {
-      const safeName = fileNameForDownload(wrap.name)
+      const safeName = fileNameForDownload(wrap)
 
       const img = new Image()
       img.crossOrigin = 'anonymous'

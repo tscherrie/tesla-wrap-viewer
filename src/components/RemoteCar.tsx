@@ -45,13 +45,13 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, displayN
             <Suspense fallback={null}>
                 <CarModel wrapTexture={wrapTexture} solidColor={color} />
             </Suspense>
-            <Html position={[0, 2, 0]} center>
+            <Html position={[0, 2, 0]} center style={{ zIndex: 200, pointerEvents: 'none' }}>
                 <div className="bg-black/50 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
                     {displayName || `Player ${id.slice(0, 4)}`}
                 </div>
             </Html>
             {selected && (
-                <Html position={[0, 3, 0]} center>
+                <Html position={[0, 3, 0]} center style={{ zIndex: 300 }}>
                     <button
                         className="bg-[#e82127] hover:bg-[#ff2b33] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg shadow-[#e82127]/30"
                         onClick={(e) => {

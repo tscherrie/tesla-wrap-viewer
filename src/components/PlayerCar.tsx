@@ -317,7 +317,7 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
                 <Suspense fallback={null}>
                     <CarModel wrapTexture={wrapTexture} solidColor={solidColor} />
                 </Suspense>
-                <Html position={[0, 2.2, 0]} center>
+                <Html position={[0, 2.2, 0]} center style={{ zIndex: 200, pointerEvents: 'auto' }}>
                     <button
                         onClick={(e) => {
                             e.stopPropagation()
