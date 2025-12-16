@@ -11,10 +11,11 @@ interface RemoteCarProps {
     velocity: { x: number, y: number, z: number }
     color: string | null
     wrapTexture: string | null
+    displayName?: string
     onClick: (id: string) => void
 }
 
-export function RemoteCar({ id, position, rotation, color, wrapTexture, onClick }: RemoteCarProps) {
+export function RemoteCar({ id, position, rotation, color, wrapTexture, displayName, onClick }: RemoteCarProps) {
     const groupRef = useRef<THREE.Group>(null)
 
     useFrame(() => {
@@ -44,7 +45,7 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, onClick 
             </Suspense>
             <Html position={[0, 2, 0]} center>
                 <div className="bg-black/50 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
-                    Player {id.slice(0, 4)}
+                    {displayName || `Player ${id.slice(0, 4)}`}
                 </div>
             </Html>
         </group>

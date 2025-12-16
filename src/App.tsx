@@ -6,6 +6,7 @@ import { Header } from './components/Header'
 
 const STORAGE_KEY = 'tesla-wrap-viewer-custom-wraps'
 const STORAGE_SELECTION_KEY = 'tesla-wrap-viewer-selection'
+const STORAGE_NAME_KEY = 'tesla-wrap-viewer-player-name'
 
 interface CustomWrap {
   id: string
@@ -17,6 +18,7 @@ function App() {
   const [wrapTexture, setWrapTexture] = useState<string | null>(null)
   const [solidColor, setSolidColor] = useState<string | null>('#e8e8e8') // Pearl White default
   const [customWraps, setCustomWraps] = useState<CustomWrap[]>([])
+  const [playerName, setPlayerName] = useState<string>('Player')
 
   // Load custom wraps from localStorage on mount
   useEffect(() => {
@@ -32,6 +34,11 @@ function App() {
         const selection = JSON.parse(selectionRaw) as { wrapTexture: string | null, solidColor: string | null }
         setWrapTexture(selection.wrapTexture ?? null)
         setSolidColor(selection.solidColor ?? '#e8e8e8')
+      }
+
+      const storedName = localStorage.getItem(STORAGE_NAME_KEY)
+      if (storedName) {
+        setPlayerName(storedName)
       }
     } catch (error) {
       console.error('Failed to load custom wraps:', error)
@@ -57,6 +64,15 @@ function App() {
     }
   }, [wrapTexture, solidColor])
 
+  // Persist player name
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_NAME_KEY, playerName)
+    } catch (error) {
+      console.error('Failed to save player name:', error)
+    }
+  }, [playerName])
+
   const handleAddCustomWrap = (wrap: CustomWrap) => {
     setCustomWraps(prev => [...prev, wrap])
   }
@@ -72,6 +88,7 @@ function App() {
         <Game
           wrapTexture={wrapTexture}
           solidColor={solidColor}
+          playerName={playerName}
           onCopyWrap={(wrap, color) => {
             setWrapTexture(wrap)
             setSolidColor(color)
@@ -94,7 +111,10 @@ function App() {
       </Suspense>
 
       {/* UI Overlays */}
-      <Header />
+      <Header
+        playerName={playerName}
+        onRename={setPlayerName}
+      />
       <WrapSelector
         onSelectWrap={setWrapTexture}
         onSelectColor={setSolidColor}

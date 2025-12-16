@@ -33,7 +33,8 @@ const players = {};
 //      rotation: { x, y, z, w }, 
 //      velocity: { x, y, z },
 //      color: string, 
-//      wrapTexture: string | null 
+//      wrapTexture: string | null,
+//      displayName: string
 //   } 
 // }
 
@@ -49,6 +50,7 @@ io.on('connection', (socket) => {
       position: { x: 0, y: 2, z: 0 }, // Spawn point
       rotation: { x: 0, y: 0, z: 0, w: 1 },
       velocity: { x: 0, y: 0, z: 0 },
+      displayName: initialState?.displayName || `Player ${socket.id.slice(0,4)}`,
       ...initialState
     };
 
@@ -113,6 +115,13 @@ io.on('connection', (socket) => {
     console.log(`Player disconnected: ${socket.id}`);
     delete players[socket.id];
     io.emit('player-left', socket.id);
+  });
+
+  socket.on('update-name', (displayName) => {
+    if (!displayName || typeof displayName !== 'string') return;
+    if (!players[socket.id]) return;
+    players[socket.id].displayName = displayName;
+    io.emit('player-name-update', { id: socket.id, displayName });
   });
 });
 
