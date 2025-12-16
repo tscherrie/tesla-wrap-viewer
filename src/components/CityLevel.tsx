@@ -6,9 +6,10 @@ import * as THREE from 'three'
 interface CityLevelProps {
     onOffset?: (offset: { x: number, y: number, z: number }) => void
     onLoaded?: () => void
+    positionOffset?: [number, number, number]
 }
 
-export function CityLevel({ onOffset, onLoaded }: CityLevelProps) {
+export function CityLevel({ onOffset, onLoaded, positionOffset = [0, 0, 0] }: CityLevelProps) {
     const { scene } = useGLTF('/models/city/cityfbx.glb')
     const [offset, setOffset] = useState<[number, number, number] | null>(null)
     const loadedOnce = useRef(false)
@@ -32,10 +33,11 @@ export function CityLevel({ onOffset, onLoaded }: CityLevelProps) {
         const y = 0 // Trust the model's origin instead of aligning to bottom bounding box
 
         console.log("City Offset Calculated:", x, y, z)
-        setOffset([x, y, z])
+        const finalOffset: [number, number, number] = [x + positionOffset[0], y + positionOffset[1], z + positionOffset[2]]
+        setOffset(finalOffset)
         onOffset?.({ x, y, z })
 
-    }, [clonedScene, onOffset])
+    }, [clonedScene, onOffset, positionOffset])
 
     useEffect(() => {
         if (offset && !loadedOnce.current) {
