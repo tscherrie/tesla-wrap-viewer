@@ -121,9 +121,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`Player disconnected: ${socket.id}`);
-    delete players[socket.id];
-    io.emit('player-left', socket.id);
+    console.log(`Player disconnected (car preserved): ${socket.id}`);
+    // Do not delete player entry; keep last known state so others can still view/copy wrap
+    // No "player-left" broadcast so the car remains visible to others
   });
 });
 
