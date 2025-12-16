@@ -32,10 +32,10 @@ export function Header({ isNight, onToggleTheme }: HeaderProps) {
 
         <button
           onClick={onToggleTheme}
-          className="pointer-events-auto text-white/80 hover:text-white text-sm bg-[#1e1e22]/80 border border-[#2a2a30] rounded-full px-3 py-1 transition-colors"
+          className="pointer-events-auto text-white/80 hover:text-white bg-[#1e1e22]/80 border border-[#2a2a30] rounded-full px-3 py-2 transition-colors flex items-center gap-2"
           title="Toggle day/night"
         >
-          {isNight ? 'Switch to Day' : 'Switch to Night'}
+          <span className="text-lg leading-none">{isNight ? '🌙' : '☀️'}</span>
         </button>
       </div>
     </header>
