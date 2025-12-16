@@ -82,6 +82,7 @@ export function WrapSelector({
 
         onAddCustomWrap(customWrap)
         handleWrapSelect(dataUrl)
+        setShowTutorial(false)
       }
       reader.readAsDataURL(file)
 
