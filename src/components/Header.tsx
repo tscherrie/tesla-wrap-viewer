@@ -23,25 +23,16 @@ export function Header({ playerName, onRename }: HeaderProps) {
             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </a>
           <div>
-            <h1 className="text-white font-semibold text-lg tracking-tight">Tesla Wrap Viewer</h1>
-            <p className="text-[#52525b] text-xs">Model 3 Highland 2025</p>
+            <h1 className="text-white font-semibold text-lg tracking-tight">Tesla Wrapper</h1>
+            <a
+              href="https://github.com/tscherrie/tesla-wrap-viewer"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#7dd3fc] hover:text-white text-xs underline"
+            >
+              github.com/tscherrie/tesla-wrap-viewer
+            </a>
           </div>
-        </div>
-
-        {/* Controls hint */}
-        <div className="hidden md:flex items-center gap-4 text-[#52525b] text-xs pointer-events-auto">
-          <span className="flex items-center gap-1.5">
-            <kbd className="px-1.5 py-0.5 rounded bg-[#1e1e22] border border-[#2a2a30] text-[#71717a]">Drag</kbd>
-            Rotate
-          </span>
-          <span className="flex items-center gap-1.5">
-            <kbd className="px-1.5 py-0.5 rounded bg-[#1e1e22] border border-[#2a2a30] text-[#71717a]">Scroll</kbd>
-            Zoom
-          </span>
-          <span className="flex items-center gap-1.5">
-            <kbd className="px-1.5 py-0.5 rounded bg-[#1e1e22] border border-[#2a2a30] text-[#71717a]">⇧ Drag</kbd>
-            Pan
-          </span>
         </div>
 
         {/* Player name */}
