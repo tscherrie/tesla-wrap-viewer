@@ -1,4 +1,4 @@
-import { useState, Suspense, useEffect } from 'react'
+import { useState, Suspense, useEffect, useRef } from 'react'
 import { Game } from './components/Game'
 import { WrapSelector } from './components/WrapSelector'
 import { LoadingOverlay } from './components/LoadingOverlay'
@@ -19,6 +19,7 @@ function App() {
   const [solidColor, setSolidColor] = useState<string | null>('#e8e8e8') // Pearl White default
   const [customWraps, setCustomWraps] = useState<CustomWrap[]>([])
   const [playerName, setPlayerName] = useState<string>('Player')
+  const hydrated = useRef(false)
 
   // Load custom wraps from localStorage on mount
   useEffect(() => {
@@ -40,6 +41,7 @@ function App() {
       if (storedName) {
         setPlayerName(storedName)
       }
+      hydrated.current = true
     } catch (error) {
       console.error('Failed to load custom wraps:', error)
     }
@@ -47,6 +49,7 @@ function App() {
 
   // Save custom wraps to localStorage whenever they change
   useEffect(() => {
+    if (!hydrated.current) return
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(customWraps))
     } catch (error) {
@@ -56,6 +59,7 @@ function App() {
 
   // Persist current selection (wrap + color)
   useEffect(() => {
+    if (!hydrated.current) return
     try {
       const payload = JSON.stringify({ wrapTexture, solidColor })
       localStorage.setItem(STORAGE_SELECTION_KEY, payload)
@@ -66,6 +70,7 @@ function App() {
 
   // Persist player name
   useEffect(() => {
+    if (!hydrated.current) return
     try {
       localStorage.setItem(STORAGE_NAME_KEY, playerName)
     } catch (error) {
