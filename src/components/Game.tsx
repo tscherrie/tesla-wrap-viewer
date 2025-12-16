@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
-import { useState, useEffect, Suspense, useRef } from 'react'
+import { useState, useEffect, Suspense, useRef, useMemo } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { GameWorld } from './GameWorld'
 import { PlayerCar } from './PlayerCar'
@@ -29,6 +29,7 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
     const [socket, setSocket] = useState<Socket | null>(null)
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
     const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
+    const [cityOffset, setCityOffset] = useState<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
 
     // Interaction State
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
@@ -107,18 +108,32 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
         }
     }, [socket, wrapTexture, solidColor])
 
+    const addOffset = useMemo(() => {
+        return (pos: { x: number, y: number, z: number }) => ({
+            x: pos.x + cityOffset.x,
+            y: pos.y + cityOffset.y,
+            z: pos.z + cityOffset.z
+        })
+    }, [cityOffset])
+
     // Handle local updates
     const handlePositionUpdate = (state: { position: any, rotation: any, velocity: any }) => {
         if (socket) {
-            socket.emit('update-state', state);
+            // Normalize to city-centered coordinates for the network
+            const netPos = {
+                x: state.position.x - cityOffset.x,
+                y: state.position.y - cityOffset.y,
+                z: state.position.z - cityOffset.z
+            }
+            socket.emit('update-state', { ...state, position: netPos });
         }
 
         // Track local position for distance checks (cheap ref write)
         if (state.position) {
             localPlayerPosition.current = {
-                x: state.position.x,
-                y: state.position.y,
-                z: state.position.z
+                x: state.position.x - cityOffset.x,
+                y: state.position.y - cityOffset.y,
+                z: state.position.z - cityOffset.z
             }
         }
 
@@ -228,7 +243,7 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
                     />
 
                     <Physics interpolate={true} timeStep={1 / 60}>
-                        <GameWorld />
+                        <GameWorld onOffset={setCityOffset} />
                         <PlayerCar
                             wrapTexture={wrapTexture}
                             solidColor={solidColor}
@@ -239,7 +254,7 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
                             <RemoteCar
                                 key={car.id}
                                 id={car.id}
-                                position={car.position}
+                                position={addOffset(car.position)}
                                 rotation={car.rotation}
                                 velocity={car.velocity}
                                 color={car.color}

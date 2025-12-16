@@ -3,12 +3,13 @@ import * as THREE from 'three'
 import { useMemo } from 'react'
 import { useThree } from '@react-three/fiber' // Import useThree
 import { CityLevel } from './CityLevel' // Import CityLevel
+import { useEffect } from 'react'
 
+interface GameWorldProps {
+    onOffset?: (offset: { x: number, y: number, z: number }) => void
+}
 
-export function GameWorld() {
-
-
-
+export function GameWorld({ onOffset }: GameWorldProps) {
     const { scene } = useThree();
     useMemo(() => {
         scene.background = new THREE.Color('#87CEEB');
@@ -18,7 +19,7 @@ export function GameWorld() {
     return (
         <group>
             {/* City Model */}
-            <CityLevel />
+            <CityLevel onOffset={onOffset} />
 
             {/* Safety Ground Plane - Invisible Floor to catch car if City has holes or is offset */}
             <RigidBody type="fixed" friction={2} position={[0, -0.05, 0]}>

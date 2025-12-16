@@ -3,7 +3,11 @@ import { RigidBody } from '@react-three/rapier'
 import { useEffect, useState, useMemo } from 'react'
 import * as THREE from 'three'
 
-export function CityLevel() {
+interface CityLevelProps {
+    onOffset?: (offset: { x: number, y: number, z: number }) => void
+}
+
+export function CityLevel({ onOffset }: CityLevelProps) {
     const { scene } = useGLTF('/models/city/cityfbx.glb')
     const [offset, setOffset] = useState<[number, number, number] | null>(null)
 
@@ -27,8 +31,9 @@ export function CityLevel() {
 
         console.log("City Offset Calculated:", x, y, z)
         setOffset([x, y, z])
+        onOffset?.({ x, y, z })
 
-    }, [clonedScene])
+    }, [clonedScene, onOffset])
 
     if (!offset) return null
 

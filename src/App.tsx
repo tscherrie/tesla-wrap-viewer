@@ -5,6 +5,7 @@ import { LoadingOverlay } from './components/LoadingOverlay'
 import { Header } from './components/Header'
 
 const STORAGE_KEY = 'tesla-wrap-viewer-custom-wraps'
+const STORAGE_SELECTION_KEY = 'tesla-wrap-viewer-selection'
 
 interface CustomWrap {
   id: string
@@ -25,6 +26,13 @@ function App() {
         const wraps = JSON.parse(stored) as CustomWrap[]
         setCustomWraps(wraps)
       }
+
+      const selectionRaw = localStorage.getItem(STORAGE_SELECTION_KEY)
+      if (selectionRaw) {
+        const selection = JSON.parse(selectionRaw) as { wrapTexture: string | null, solidColor: string | null }
+        setWrapTexture(selection.wrapTexture ?? null)
+        setSolidColor(selection.solidColor ?? '#e8e8e8')
+      }
     } catch (error) {
       console.error('Failed to load custom wraps:', error)
     }
@@ -38,6 +46,16 @@ function App() {
       console.error('Failed to save custom wraps:', error)
     }
   }, [customWraps])
+
+  // Persist current selection (wrap + color)
+  useEffect(() => {
+    try {
+      const payload = JSON.stringify({ wrapTexture, solidColor })
+      localStorage.setItem(STORAGE_SELECTION_KEY, payload)
+    } catch (error) {
+      console.error('Failed to save selection:', error)
+    }
+  }, [wrapTexture, solidColor])
 
   const handleAddCustomWrap = (wrap: CustomWrap) => {
     setCustomWraps(prev => [...prev, wrap])
