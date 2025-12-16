@@ -191,20 +191,23 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
 
     const handleCarClick = (id: string) => {
         if (id === socket?.id) return;
-        setSelectedPlayer(id);
-
         const target = players[id];
-        if (target) {
-            const dx = localPlayerPosition.current.x - target.position.x;
-            const dy = localPlayerPosition.current.y - target.position.y;
-            const dz = localPlayerPosition.current.z - target.position.z;
-            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (distance <= MAX_CHAT_DISTANCE) {
-                setActiveChatTarget(id);
-            } else {
-                setActiveChatTarget(null);
-            }
+        if (!target) {
+            setSelectedPlayer(null);
+            setActiveChatTarget(null);
+            return;
+        }
+
+        const dx = localPlayerPosition.current.x - target.position.x;
+        const dy = localPlayerPosition.current.y - target.position.y;
+        const dz = localPlayerPosition.current.z - target.position.z;
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (distance <= MAX_CHAT_DISTANCE) {
+            setSelectedPlayer(id);
+            setActiveChatTarget(id);
         } else {
+            setSelectedPlayer(null);
             setActiveChatTarget(null);
         }
     };
