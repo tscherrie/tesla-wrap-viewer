@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { GameWorld } from './GameWorld'
 import { PlayerCar } from './PlayerCar'
@@ -28,9 +28,13 @@ interface GameProps {
 export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
     const [socket, setSocket] = useState<Socket | null>(null)
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
+    const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
 
     // Interaction State
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
+    const [activeChatTarget, setActiveChatTarget] = useState<string | null>(null)
+
+    const MAX_CHAT_DISTANCE = 5 // meters in world units
 
 
     useEffect(() => {
@@ -108,33 +112,103 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
         if (socket) {
             socket.emit('update-state', state);
         }
+
+        // Track local position for distance checks (cheap ref write)
+        if (state.position) {
+            localPlayerPosition.current = {
+                x: state.position.x,
+                y: state.position.y,
+                z: state.position.z
+            }
+        }
+
+        // Auto-close chat if the target moves out of range
+        if (activeChatTarget) {
+            const target = players[activeChatTarget];
+            if (target) {
+                const dx = localPlayerPosition.current.x - target.position.x;
+                const dy = localPlayerPosition.current.y - target.position.y;
+                const dz = localPlayerPosition.current.z - target.position.z;
+                const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (distance > MAX_CHAT_DISTANCE) {
+                    setActiveChatTarget(null);
+                }
+            } else {
+                setActiveChatTarget(null);
+            }
+        }
     };
 
     const handleCarClick = (id: string) => {
         if (id === socket?.id) return;
         setSelectedPlayer(id);
-        // We'll trust the click event propagation for now or implement a screen space menu
-        // For simplicity, let's just toggle a menu UI state
-        // In 3D click handler, we might want to project to screen coords? 
-        // Or just show a HTML overlay on top of the car.
+
+        const target = players[id];
+        if (target) {
+            const dx = localPlayerPosition.current.x - target.position.x;
+            const dy = localPlayerPosition.current.y - target.position.y;
+            const dz = localPlayerPosition.current.z - target.position.z;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (distance <= MAX_CHAT_DISTANCE) {
+                setActiveChatTarget(id);
+            } else {
+                setActiveChatTarget(null);
+            }
+        } else {
+            setActiveChatTarget(null);
+        }
     };
+
+    // Drop chat session if the remote player disconnects
+    useEffect(() => {
+        if (!activeChatTarget) return;
+        const target = players[activeChatTarget];
+        if (!target) {
+            setActiveChatTarget(null);
+            return;
+        }
+
+        const dx = localPlayerPosition.current.x - target.position.x;
+        const dy = localPlayerPosition.current.y - target.position.y;
+        const dz = localPlayerPosition.current.z - target.position.z;
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (distance > MAX_CHAT_DISTANCE) {
+            setActiveChatTarget(null);
+        }
+    }, [players, activeChatTarget]);
 
     const [spawnPosition] = useState(() => {
         const points = [
-            [0, 5, 0],
-            [20, 5, 20],
-            [-20, 5, -20],
-            [20, 5, -20],
-            [-20, 5, 20]
+            [0, 5, 0], // Center (Safe)
+            // [20, 5, 20], // Risk of clipping
+            // [-20, 5, -20],
+            // [20, 5, -20],
+            // [-20, 5, 20]
         ]
         return points[Math.floor(Math.random() * points.length)] as [number, number, number]
     })
+
+    useEffect(() => {
+        localPlayerPosition.current = {
+            x: spawnPosition[0],
+            y: spawnPosition[1],
+            z: spawnPosition[2]
+        }
+    }, [spawnPosition])
 
     const remoteCars = Object.values(players).filter(p => p.id !== socket?.id);
 
     return (
         <div className="w-full h-full relative">
-            <ChatBox socket={socket} />
+            {activeChatTarget && (
+                <ChatBox
+                    socket={socket}
+                    targetId={activeChatTarget}
+                    targetLabel={players[activeChatTarget] ? `Player ${players[activeChatTarget].id.slice(0, 4)}` : undefined}
+                    onClose={() => setActiveChatTarget(null)}
+                />
+            )}
             {/* 3D Scene */}
             {/* PERFORMANCE: Cap dpr at 1.5 to prevent massive lag on Retina/High-DPI screens */}
             <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 5, 10], fov: 50 }}>
@@ -186,7 +260,6 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow-lg z-50">
                     <h3 className="font-bold mb-2">Player {selectedPlayer.slice(0, 4)}</h3>
                     <div className="flex flex-col gap-2">
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded">Chat</button>
                         <button
                             className="bg-green-500 text-white px-4 py-2 rounded"
                             onClick={() => {

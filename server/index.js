@@ -89,13 +89,24 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('chat-message', (message) => {
-    // Broadcast to all
-    io.emit('chat-message', {
+  socket.on('chat-message', ({ to, text }) => {
+    // Direct message between sender and target only
+    if (!to || typeof text !== 'string' || text.trim() === '') return;
+
+    const payload = {
       id: socket.id,
-      text: message,
+      to,
+      text,
       timestamp: Date.now()
-    });
+    };
+
+    // Echo back to sender so their UI updates instantly
+    socket.emit('chat-message', payload);
+
+    // Deliver to target player if they are connected
+    if (players[to]) {
+      socket.to(to).emit('chat-message', payload);
+    }
   });
 
   socket.on('disconnect', () => {

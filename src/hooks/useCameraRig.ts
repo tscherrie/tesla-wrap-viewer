@@ -23,14 +23,14 @@ const CONFIGS: Record<CameraMode, CameraConfig> = {
     },
     // First person / Action view (Interior/Hood)
     ACTION: {
-        offset: new Vector3(0, 1.1, -0.2), // Interior
+        offset: new Vector3(0.3, 1.1, -0.2), // Interior
         lookAtOffset: new Vector3(0, 1, 20), // +Z is Forward (due to 180 rotation)
         fov: 75
     },
     // Reverse view (Looking back from INSIDE the car, BACKSEAT)
     REVERSE: {
-        offset: new Vector3(0, 1.2, 1.5), // Backseat position to avoid front seat obstruction
-        lookAtOffset: new Vector3(0, 1.0, -15), // -Z is Backward (due to 180 rotation)
+        offset: new Vector3(0, 1.2, -0.1), // Move camera inside cabin near rear seats
+        lookAtOffset: new Vector3(0, 1.0, -12), // Look straight back from interior
         fov: 100 // Wide for better rear visibility
     }
 }

@@ -38,6 +38,7 @@ function TexturedCar({ object, texturePath }: { object: THREE.Object3D, textureP
             clearcoat: 0.1,
             clearcoatRoughness: 0.2,
             transparent: true,
+            depthWrite: false, // prevent local car shell from occluding other wraps in first-person
             side: THREE.DoubleSide,
             polygonOffset: true,
             polygonOffsetFactor: -1
@@ -69,7 +70,8 @@ function TexturedCar({ object, texturePath }: { object: THREE.Object3D, textureP
             opacity: 0.3,
             side: THREE.DoubleSide,
             clearcoat: 1.0,
-            clearcoatRoughness: 0.0
+            clearcoatRoughness: 0.0,
+            depthWrite: false
           })
           child.material = glass
         }
@@ -85,7 +87,8 @@ function TexturedCar({ object, texturePath }: { object: THREE.Object3D, textureP
             thickness: 0.2,
             transparent: true,
             opacity: 0.5,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            depthWrite: false
           })
           child.material = lightGlass
         }
@@ -97,7 +100,13 @@ function TexturedCar({ object, texturePath }: { object: THREE.Object3D, textureP
 }
 
 // Component for solid color
-function SolidColorCar({ object, color }: { object: THREE.Object3D, color: string }) {
+interface SolidColorCarProps {
+  object: THREE.Object3D
+  color: string
+  depthWrite?: boolean
+}
+
+function SolidColorCar({ object, color, depthWrite = true }: SolidColorCarProps) {
   useEffect(() => {
     object.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -111,7 +120,8 @@ function SolidColorCar({ object, color }: { object: THREE.Object3D, color: strin
             roughness: 0.3,
             clearcoat: 0.8,
             clearcoatRoughness: 0.1,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            depthWrite
           })
           child.material = material
         }
@@ -140,7 +150,8 @@ function SolidColorCar({ object, color }: { object: THREE.Object3D, color: strin
             opacity: 0.3,
             side: THREE.DoubleSide,
             clearcoat: 1.0,
-            clearcoatRoughness: 0.0
+            clearcoatRoughness: 0.0,
+            depthWrite: false // keep windows from blocking visibility of other cars
           })
           child.material = glass
         }
@@ -156,7 +167,8 @@ function SolidColorCar({ object, color }: { object: THREE.Object3D, color: strin
             thickness: 0.2,
             transparent: true,
             opacity: 0.5,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            depthWrite: false
           })
           child.material = lightGlass
         }
@@ -215,7 +227,8 @@ export function CarModel({ wrapTexture, solidColor }: CarModelProps) {
   if (wrapTexture) {
     return (
       <group rotation={[0, Math.PI, 0]}>
-        <SolidColorCar object={processedModel.object.clone()} color={solidColor || defaultColor} />
+        {/* Base paint under wrap should not write depth to avoid occluding other cars in first person */}
+        <SolidColorCar object={processedModel.object.clone()} color={solidColor || defaultColor} depthWrite={false} />
         <TexturedCar object={processedModel.object.clone()} texturePath={wrapTexture} />
       </group>
     )
@@ -227,4 +240,3 @@ export function CarModel({ wrapTexture, solidColor }: CarModelProps) {
     </group>
   )
 }
-

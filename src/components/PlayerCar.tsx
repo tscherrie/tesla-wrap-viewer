@@ -330,4 +330,3 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
         </RigidBody>
     )
 }
-
