@@ -26,9 +26,10 @@ interface GameProps {
     playerName: string
     onRename: (name: string) => void
     isNight: boolean
+    onCopyWrap: (wrap: string | null, color: string | null) => void
 }
 
-export function Game({ wrapTexture, solidColor, playerName, onRename, isNight }: GameProps) {
+export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, onCopyWrap }: GameProps) {
     const [socket, setSocket] = useState<Socket | null>(null)
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
     const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
@@ -206,6 +207,14 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight }:
         }
     };
 
+    const handleCopy = (id: string) => {
+        const target = players[id];
+        if (target) {
+            onCopyWrap?.(target.wrapTexture, target.color);
+        }
+        setSelectedPlayer(null);
+    };
+
     // Drop chat session if the remote player disconnects
     useEffect(() => {
         if (!activeChatTarget) return;
@@ -298,7 +307,8 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight }:
                                 wrapTexture={car.wrapTexture}
                                 displayName={car.displayName}
                                 selected={selectedPlayer === car.id}
-                                onClick={handleCarClick}
+                                onSelect={handleCarClick}
+                                onCopy={handleCopy}
                             />
                         ))}
                     </Physics>

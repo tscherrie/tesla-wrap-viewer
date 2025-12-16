@@ -12,11 +12,12 @@ interface RemoteCarProps {
     color: string | null
     wrapTexture: string | null
     displayName?: string
-    onClick: (id: string) => void
+    onSelect: (id: string) => void
+    onCopy: (id: string) => void
     selected?: boolean
 }
 
-export function RemoteCar({ id, position, rotation, color, wrapTexture, displayName, selected, onClick }: RemoteCarProps) {
+export function RemoteCar({ id, position, rotation, color, wrapTexture, displayName, selected, onSelect, onCopy }: RemoteCarProps) {
     const groupRef = useRef<THREE.Group>(null)
 
     useFrame(() => {
@@ -38,7 +39,7 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, displayN
             position={[position.x, position.y, position.z]}
             onClick={(e) => {
                 e.stopPropagation()
-                onClick(id)
+                onSelect(id)
             }}
         >
             <Suspense fallback={null}>
@@ -55,7 +56,7 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, displayN
                         className="bg-[#e82127] hover:bg-[#ff2b33] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg shadow-[#e82127]/30"
                         onClick={(e) => {
                             e.stopPropagation()
-                            onClick(id)
+                            onCopy(id)
                         }}
                     >
                         Copy Wrap

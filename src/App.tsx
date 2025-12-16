@@ -137,6 +137,24 @@ function App() {
           playerName={playerName}
           onRename={setPlayerName}
           isNight={isNight}
+          onCopyWrap={(wrap, color) => {
+            setWrapTexture(wrap)
+            setSolidColor(color)
+
+            // Check if copied wrap is a custom Data URI
+            if (wrap && wrap.startsWith('data:image')) {
+              // Check if we already have it (simple dedup by string comparison might be heavy, but safe)
+              const exists = customWraps.some(w => w.dataUrl === wrap)
+              if (!exists) {
+                const newWrap: CustomWrap = {
+                  id: `copied-${Date.now()}`,
+                  name: `Copied Wrap ${new Date().toLocaleTimeString()}`,
+                  dataUrl: wrap
+                }
+                handleAddCustomWrap(newWrap)
+              }
+            }
+          }}
         />
       </Suspense>
 
