@@ -1,15 +1,17 @@
 import { useGLTF } from '@react-three/drei'
 import { RigidBody } from '@react-three/rapier'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 interface CityLevelProps {
     onOffset?: (offset: { x: number, y: number, z: number }) => void
+    onLoaded?: () => void
 }
 
-export function CityLevel({ onOffset }: CityLevelProps) {
+export function CityLevel({ onOffset, onLoaded }: CityLevelProps) {
     const { scene } = useGLTF('/models/city/cityfbx.glb')
     const [offset, setOffset] = useState<[number, number, number] | null>(null)
+    const loadedOnce = useRef(false)
 
     // Clone the scene to ensure we have a fresh instance and don't mutate the global cache
     // usage of useMemo ensures we only clone when the base scene changes
@@ -34,6 +36,13 @@ export function CityLevel({ onOffset }: CityLevelProps) {
         onOffset?.({ x, y, z })
 
     }, [clonedScene, onOffset])
+
+    useEffect(() => {
+        if (offset && !loadedOnce.current) {
+            loadedOnce.current = true
+            onLoaded?.()
+        }
+    }, [offset, onLoaded])
 
     if (!offset) return null
 

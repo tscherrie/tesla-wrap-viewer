@@ -6,9 +6,10 @@ import { CityLevel } from './CityLevel' // Import CityLevel
 
 interface GameWorldProps {
     onOffset?: (offset: { x: number, y: number, z: number }) => void
+    onLoaded?: () => void
 }
 
-export function GameWorld({ onOffset }: GameWorldProps) {
+export function GameWorld({ onOffset, onLoaded }: GameWorldProps) {
     const { scene } = useThree();
     useMemo(() => {
         scene.background = new THREE.Color('#87CEEB');
@@ -18,7 +19,7 @@ export function GameWorld({ onOffset }: GameWorldProps) {
     return (
         <group>
             {/* City Model */}
-            <CityLevel onOffset={onOffset} />
+            <CityLevel onOffset={onOffset} onLoaded={onLoaded} />
 
             {/* Safety Ground Plane - Invisible Floor to catch car if City has holes or is offset */}
             <RigidBody type="fixed" friction={2} position={[0, -0.05, 0]}>

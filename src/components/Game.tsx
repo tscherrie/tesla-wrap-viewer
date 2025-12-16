@@ -7,6 +7,7 @@ import { PlayerCar } from './PlayerCar'
 import { RemoteCar } from './RemoteCar'
 import { ChatBox } from './ChatBox'
 import { Environment } from '@react-three/drei'
+import { LoadingOverlay } from './LoadingOverlay'
 
 
 // Define types locally for now since we don't have a shared types file yet
@@ -34,6 +35,7 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
     const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
     const [cityOffset, setCityOffset] = useState<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
+    const [worldLoaded, setWorldLoaded] = useState(false)
 
     // Interaction State
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
@@ -257,6 +259,11 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
 
     return (
         <div className="w-full h-full relative">
+            {!worldLoaded && (
+                <div className="absolute inset-0 z-50">
+                    <LoadingOverlay />
+                </div>
+            )}
             {activeChatTarget && (
                 <ChatBox
                     socket={socket}
@@ -287,7 +294,7 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, isNight, o
                     />
 
                     <Physics interpolate={true} timeStep={1 / 60}>
-                        <GameWorld onOffset={setCityOffset} />
+                        <GameWorld onOffset={setCityOffset} onLoaded={() => setWorldLoaded(true)} />
                         <PlayerCar
                             wrapTexture={wrapTexture}
                             solidColor={solidColor}
