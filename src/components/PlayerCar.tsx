@@ -65,8 +65,9 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
         const torque = { x: 0, y: 0, z: 0 };
 
         // Base strengths tuned for 60fps
-        const impulseStrength = 10 * timeScale;
-        const baseTorqueStrength = 8 * timeScale;
+        // Softer acceleration/steering for easier handling
+        const impulseStrength = 6 * timeScale;
+        const baseTorqueStrength = 6 * timeScale;
 
         const rot = rigidBodyRef.current.rotation();
         const quat = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w);
@@ -76,7 +77,7 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
         let applyForce = true;
 
         // Limit Top Speed
-        const maxSpeed = 20; // Very slow, parking lot speed (approx 30km/h)
+        const maxSpeed = 15; // lower top speed for tighter control
         const currentSpeed = rigidBodyRef.current.linvel().x ** 2 + rigidBodyRef.current.linvel().y ** 2 + rigidBodyRef.current.linvel().z ** 2;
 
         // Only apply impulse if below max speed, OR if impulse opposes velocity (breaking/reversing)
