@@ -121,11 +121,11 @@ export function Game({ wrapTexture, solidColor, onCopyWrap }: GameProps) {
 
     const [spawnPosition] = useState(() => {
         const points = [
-            [0, 25, 0],
-            [20, 25, 20],
-            [-20, 25, -20],
-            [20, 25, -20],
-            [-20, 25, 20]
+            [0, 5, 0],
+            [20, 5, 20],
+            [-20, 5, -20],
+            [20, 5, -20],
+            [-20, 5, 20]
         ]
         return points[Math.floor(Math.random() * points.length)] as [number, number, number]
     })
