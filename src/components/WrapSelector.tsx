@@ -56,6 +56,7 @@ export function WrapSelector({
   const [activeTab, setActiveTab] = useState<'wraps' | 'colors'>('wraps')
   const [isExpanded, setIsExpanded] = useState(true)
   const [showTutorial, setShowTutorial] = useState(false)
+  const [downloadWrap, setDownloadWrap] = useState<CustomWrap | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleWrapSelect = (wrapPath: string) => {
@@ -103,8 +104,8 @@ export function WrapSelector({
     onRemoveCustomWrap(id)
   }
 
-  const handleDownloadCustomWrap = async (wrap: CustomWrap, e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleDownloadCustomWrap = async (wrap: CustomWrap, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
     try {
       const img = new Image()
       img.crossOrigin = 'anonymous'
@@ -211,6 +212,17 @@ export function WrapSelector({
             </div>
           </div>
         </div>
+      )}
+
+      {downloadWrap && (
+        <DownloadModal
+          wrap={downloadWrap}
+          onClose={() => setDownloadWrap(null)}
+          onDownload={() => {
+            handleDownloadCustomWrap(downloadWrap)
+            setDownloadWrap(null)
+          }}
+        />
       )}
 
       {/* Toggle button */}
@@ -344,11 +356,14 @@ export function WrapSelector({
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
-                          {/* Download button */}
+                          {/* Download button (opens instructions) */}
                           <button
-                            onClick={(e) => handleDownloadCustomWrap(wrap, e)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setDownloadWrap(wrap)
+                            }}
                             className="absolute top-2 left-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs border border-white/20"
-                            title="Download PNG (1024x1024)"
+                            title="Download & transfer guide"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
@@ -397,6 +412,64 @@ export function WrapSelector({
               Reset to Default
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DownloadModal({ wrap, onClose, onDownload }: { wrap: CustomWrap, onClose: () => void, onDownload: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-[90vw] max-w-xl max-h-[85vh] bg-[#0c0c0f] text-white rounded-2xl border border-[#22232a] shadow-2xl overflow-hidden">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-[#22232a]">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#9ca3af]">Wrap Studio</p>
+            <h3 className="text-xl font-semibold tracking-tight mt-1">How to Use Custom Wraps</h3>
+            <p className="text-xs text-[#9ca3af] mt-1">Selected file: {wrap.name || 'custom wrap'}</p>
+          </div>
+          <button className="text-[#9ca3af] hover:text-white" onClick={onClose}>✕</button>
+        </div>
+        <div className="p-6 space-y-4 overflow-y-auto">
+          <div className="space-y-2 text-sm text-[#d1d5db]">
+            <ol className="space-y-3 list-decimal list-inside">
+              <li>Download the design as a PNG file.</li>
+              <li>Load your wraps onto a USB drive in a folder called <span className="font-semibold">Wraps</span>.</li>
+              <li>Apply in your Tesla: <span className="font-semibold">Toybox → Paint Shop → Wraps</span> tab.</li>
+            </ol>
+          </div>
+          <div className="space-y-2 text-sm text-[#d1d5db]">
+            <p className="text-xs uppercase tracking-widest text-[#9ca3af]">Requirements</p>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>Image Resolution: 512x512 to 1024x1024 pixels</li>
+              <li>File Size: ≤ 1 MB</li>
+              <li>File Name: alphanumeric, underscores, dashes, spaces (max 30 chars)</li>
+              <li>File Format: PNG</li>
+              <li>File Count: up to 10 images at a time</li>
+            </ul>
+          </div>
+          <div className="space-y-2 text-sm text-[#d1d5db]">
+            <p className="text-xs uppercase tracking-widest text-[#9ca3af]">USB Drive Setup</p>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>Format: exFAT, FAT32 (Windows), MS-DOS FAT (Mac), ext3, or ext4</li>
+              <li>Note: NTFS is not supported.</li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-[#22232a] flex items-center justify-end gap-3">
+          <button
+            className="px-4 py-2 text-sm text-[#9ca3af] hover:text-white transition-colors"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg bg-[#e82127] hover:bg-[#ff2b33] text-sm font-semibold text-white shadow-lg shadow-[#e82127]/30 transition-colors"
+            onClick={onDownload}
+          >
+            Download PNG
+          </button>
         </div>
       </div>
     </div>
