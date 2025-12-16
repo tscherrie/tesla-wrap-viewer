@@ -3,7 +3,6 @@ import * as THREE from 'three'
 import { useMemo } from 'react'
 import { useThree } from '@react-three/fiber' // Import useThree
 import { CityLevel } from './CityLevel' // Import CityLevel
-import { useEffect } from 'react'
 
 interface GameWorldProps {
     onOffset?: (offset: { x: number, y: number, z: number }) => void

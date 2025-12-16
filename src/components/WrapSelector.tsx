@@ -55,6 +55,7 @@ export function WrapSelector({
 }: WrapSelectorProps) {
   const [activeTab, setActiveTab] = useState<'wraps' | 'colors'>('wraps')
   const [isExpanded, setIsExpanded] = useState(true)
+  const [showTutorial, setShowTutorial] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleWrapSelect = (wrapPath: string) => {
@@ -103,6 +104,85 @@ export function WrapSelector({
 
   return (
     <div className="absolute top-4 right-4 z-10">
+      {/* Tutorial Modal */}
+      {showTutorial && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowTutorial(false)}
+          />
+          <div className="relative w-[90vw] max-w-4xl max-h-[85vh] bg-[#0c0c0f] text-white rounded-2xl border border-[#22232a] shadow-2xl overflow-hidden">
+            <div className="flex items-start justify-between px-6 py-4 border-b border-[#22232a]">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-[#9ca3af]">Wrap Studio</p>
+                <h3 className="text-2xl font-semibold tracking-tight mt-1">Create a Custom Wrap</h3>
+                <p className="text-sm text-[#9ca3af] mt-1">Follow the quick guide below to generate and apply your own design.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/wraps/template.png"
+                  download
+                  className="px-3 py-2 rounded-lg border border-[#30303a] bg-[#17171c] hover:border-[#e82127] hover:text-white text-sm text-[#d1d5db] transition-colors"
+                >
+                  Download wrap template
+                </a>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-2 rounded-lg bg-[#e82127] hover:bg-[#ff2b33] text-sm font-semibold text-white shadow-lg shadow-[#e82127]/30 transition-colors"
+                >
+                  Upload custom wrap
+                </button>
+                <button
+                  onClick={() => setShowTutorial(false)}
+                  className="ml-2 text-[#9ca3af] hover:text-white"
+                  aria-label="Close tutorial"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-[#141418] to-[#0d0d11] border border-[#1f1f27] rounded-xl p-4">
+                  <div className="text-xs uppercase tracking-widest text-[#9ca3af] mb-2">Steps</div>
+                  <ol className="space-y-4 text-sm leading-relaxed">
+                    <li>
+                      <span className="font-semibold text-white">1) Download the empty template image</span><br />
+                      Use the “Download wrap template” button (top right) to get a perfectly aligned UV map PNG.
+                    </li>
+                    <li>
+                      <span className="font-semibold text-white">2) Generate art with Gemini</span><br />
+                      Visit <a href="https://gemini.google.com/gem/1lJl7rD4Ty-TlveolaVWGpIGzr0Wk_HjU?usp=sharing" className="text-[#7dd3fc] hover:text-white underline" target="_blank" rel="noreferrer">this Gemini prompt</a> and describe your vibe (e.g. <em>“intricate old cyberpunk robotaxi design”</em>).
+                    </li>
+                    <li>
+                      <span className="font-semibold text-white">3) Download the generated image</span><br />
+                      Save the PNG/JPEG to your device.
+                    </li>
+                    <li>
+                      <span className="font-semibold text-white">4) Upload to Wrap Studio</span><br />
+                      Click “Upload custom wrap” (top right) and select your file. It will appear in “Your Custom Wraps” and auto-apply to the car.
+                    </li>
+                  </ol>
+                </div>
+                <div className="bg-gradient-to-br from-[#101017] to-[#0b0b12] border border-[#1f1f27] rounded-xl p-4 space-y-3">
+                  <div className="text-xs uppercase tracking-widest text-[#9ca3af]">Tips for best results</div>
+                  <ul className="space-y-2 text-sm text-[#d1d5db]/90">
+                    <li>Use 2048×2048 or larger images for crisp details.</li>
+                    <li>Keep important graphics away from extreme edges; the template shows safe zones.</li>
+                    <li>High-contrast designs pop; subtle gradients look premium.</li>
+                    <li>After uploading, you can still change the base paint color under the wrap.</li>
+                  </ul>
+                  <div className="rounded-lg border border-[#2c2c35] bg-[#12121a] p-3 text-xs text-[#a1a1aa]">
+                    Pro move: generate multiple variants in Gemini, then upload a few and switch between them in “Your Custom Wraps.”
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toggle button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -185,15 +265,15 @@ export function WrapSelector({
 
             {activeTab === 'wraps' && (
               <div className="space-y-4">
-                {/* Upload button */}
+                {/* Create/Upload flow entry point */}
                 <button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setShowTutorial(true)}
                   className="w-full py-3 px-4 rounded-xl border-2 border-dashed border-[#3d3d45] text-[#71717a] hover:border-[#52525b] hover:text-white transition-colors flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
-                  Upload Custom Wrap
+                  Create Custom Wrap
                 </button>
                 <input
                   ref={fileInputRef}
