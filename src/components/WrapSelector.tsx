@@ -145,7 +145,7 @@ export function WrapSelector({
     <div className="absolute top-4 right-4 z-10">
       {/* Tutorial Modal */}
       {showTutorial && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowTutorial(false)}
@@ -429,7 +429,7 @@ export function WrapSelector({
 
 function DownloadModal({ wrap, onClose, onDownload }: { wrap: CustomWrap, onClose: () => void, onDownload: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-[90vw] max-w-xl max-h-[85vh] bg-[#0c0c0f] text-white rounded-2xl border border-[#22232a] shadow-2xl overflow-hidden">
         <div className="flex items-start justify-between px-6 py-4 border-b border-[#22232a]">
