@@ -6,6 +6,7 @@ import { GameWorld } from './GameWorld'
 import { PlayerCar } from './PlayerCar'
 import { RemoteCar } from './RemoteCar'
 import { ChatBox } from './ChatBox'
+import { Environment } from '@react-three/drei'
 
 
 // Define types locally for now since we don't have a shared types file yet
