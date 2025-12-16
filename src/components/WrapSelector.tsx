@@ -107,6 +107,15 @@ export function WrapSelector({
   const handleDownloadCustomWrap = async (wrap: CustomWrap, e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
     try {
+      const safeName = (() => {
+        const base = (wrap.name || 'custom_wrap')
+          .replace(/[^a-zA-Z0-9 _-]/g, '') // allowed chars
+          .trim()
+          .slice(0, 30)
+          || 'custom_wrap';
+        return `${base}.png`;
+      })();
+
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.src = wrap.dataUrl
@@ -125,7 +134,7 @@ export function WrapSelector({
       const pngData = canvas.toDataURL('image/png')
       const link = document.createElement('a')
       link.href = pngData
-      link.download = `${wrap.name || 'custom-wrap'}.png`
+      link.download = safeName
       link.click()
     } catch (err) {
       console.error('Failed to download wrap', err)
