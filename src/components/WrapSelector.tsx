@@ -111,71 +111,65 @@ export function WrapSelector({
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowTutorial(false)}
           />
-          <div className="relative w-[90vw] max-w-4xl max-h-[85vh] bg-[#0c0c0f] text-white rounded-2xl border border-[#22232a] shadow-2xl overflow-hidden">
-            <div className="flex items-start justify-between px-6 py-4 border-b border-[#22232a]">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-[#9ca3af]">Wrap Studio</p>
-                <h3 className="text-2xl font-semibold tracking-tight mt-1">Create a Custom Wrap</h3>
-                <p className="text-sm text-[#9ca3af] mt-1">Follow the quick guide below to generate and apply your own design.</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <a
-                  href="/wraps/template.png"
-                  download
-                  className="px-3 py-2 rounded-lg border border-[#30303a] bg-[#17171c] hover:border-[#e82127] hover:text-white text-sm text-[#d1d5db] transition-colors"
-                >
-                  Download wrap template
-                </a>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-2 rounded-lg bg-[#e82127] hover:bg-[#ff2b33] text-sm font-semibold text-white shadow-lg shadow-[#e82127]/30 transition-colors"
-                >
-                  Upload custom wrap
-                </button>
-                <button
-                  onClick={() => setShowTutorial(false)}
-                  className="ml-2 text-[#9ca3af] hover:text-white"
-                  aria-label="Close tutorial"
-                >
-                  ✕
-                </button>
-              </div>
+          <div className="relative w-[90vw] max-w-4xl max-h-[85vh] bg-[#0c0c0f] text-white rounded-2xl border border-[#22232a] shadow-2xl overflow-hidden p-8">
+            <div className="flex items-start justify-between pb-4 border-b border-[#22232a]">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#9ca3af]">Wrap Studio</p>
+              <button
+                onClick={() => setShowTutorial(false)}
+                className="text-[#9ca3af] hover:text-white"
+                aria-label="Close tutorial"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-[#141418] to-[#0d0d11] border border-[#1f1f27] rounded-xl p-4">
-                  <div className="text-xs uppercase tracking-widest text-[#9ca3af] mb-2">Steps</div>
-                  <ol className="space-y-4 text-sm leading-relaxed">
-                    <li>
-                      <span className="font-semibold text-white">1) Download the empty template image</span><br />
-                      Use the “Download wrap template” button (top right) to get a perfectly aligned UV map PNG.
+            <div className="pt-8 overflow-y-auto space-y-8">
+              {/* Hero band */}
+              <div className="relative overflow-hidden rounded-2xl border border-[#1f1f27] bg-gradient-to-r from-[#0f1118] via-[#141824] to-[#0d0f18] px-6 py-5">
+                <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 20%, #e82127 0, transparent 35%), radial-gradient(circle at 80% 0%, #8ab4ff 0, transparent 30%)' }} />
+                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <h4 className="text-2xl font-semibold tracking-tight mt-1">Create a Custom Wrap</h4>
+                    <p className="text-sm text-[#cbd5e1] max-w-2xl mt-1">Generate artwork with Gemini, then upload and preview instantly on your Model 3.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-[#e82127] hover:bg-[#ff2b33] text-sm font-semibold text-white shadow-lg shadow-[#e82127]/30 transition-colors"
+                    >
+                      Upload custom wrap
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Steps */}
+              <div className="grid md:grid-cols-1 gap-8 items-start">
+                <div className="bg-[#0f1017] border border-[#1f1f27] rounded-2xl p-6 shadow-lg shadow-black/30">
+                  <div className="text-xs uppercase tracking-widest text-[#9ca3af] mb-4">Steps</div>
+                  <ol className="space-y-5 text-sm leading-relaxed">
+                    <li className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">1</div>
+                      <div>
+                        <div className="font-semibold text-white">Generate art with Gemini</div>
+                        <p className="text-[#cbd5e1]">Open <a href="https://gemini.google.com/gem/1lJl7rD4Ty-TlveolaVWGpIGzr0Wk_HjU?usp=sharing" className="text-[#7dd3fc] hover:text-white underline" target="_blank" rel="noreferrer">this Gemini prompt</a> and describe your vibe (e.g. <em>“intricate old cyberpunk robotaxi design”</em>). The template is already baked into the prompt.</p>
+                      </div>
                     </li>
-                    <li>
-                      <span className="font-semibold text-white">2) Generate art with Gemini</span><br />
-                      Visit <a href="https://gemini.google.com/gem/1lJl7rD4Ty-TlveolaVWGpIGzr0Wk_HjU?usp=sharing" className="text-[#7dd3fc] hover:text-white underline" target="_blank" rel="noreferrer">this Gemini prompt</a> and describe your vibe (e.g. <em>“intricate old cyberpunk robotaxi design”</em>).
+                    <li className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">2</div>
+                      <div>
+                        <div className="font-semibold text-white">Download the generated image</div>
+                        <p className="text-[#cbd5e1]">Save the PNG/JPEG to your device.</p>
+                      </div>
                     </li>
-                    <li>
-                      <span className="font-semibold text-white">3) Download the generated image</span><br />
-                      Save the PNG/JPEG to your device.
-                    </li>
-                    <li>
-                      <span className="font-semibold text-white">4) Upload to Wrap Studio</span><br />
-                      Click “Upload custom wrap” (top right) and select your file. It will appear in “Your Custom Wraps” and auto-apply to the car.
+                    <li className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#e82127] text-white flex items-center justify-center text-sm font-semibold shrink-0">3</div>
+                      <div>
+                        <div className="font-semibold text-white">Upload to Wrap Studio</div>
+                        <p className="text-[#cbd5e1]">Click “Upload custom wrap” and select your file. It appears in “Your Custom Wraps” and auto-applies to the car.</p>
+                      </div>
                     </li>
                   </ol>
-                </div>
-                <div className="bg-gradient-to-br from-[#101017] to-[#0b0b12] border border-[#1f1f27] rounded-xl p-4 space-y-3">
-                  <div className="text-xs uppercase tracking-widest text-[#9ca3af]">Tips for best results</div>
-                  <ul className="space-y-2 text-sm text-[#d1d5db]/90">
-                    <li>Use 2048×2048 or larger images for crisp details.</li>
-                    <li>Keep important graphics away from extreme edges; the template shows safe zones.</li>
-                    <li>High-contrast designs pop; subtle gradients look premium.</li>
-                    <li>After uploading, you can still change the base paint color under the wrap.</li>
-                  </ul>
-                  <div className="rounded-lg border border-[#2c2c35] bg-[#12121a] p-3 text-xs text-[#a1a1aa]">
-                    Pro move: generate multiple variants in Gemini, then upload a few and switch between them in “Your Custom Wraps.”
-                  </div>
                 </div>
               </div>
             </div>
