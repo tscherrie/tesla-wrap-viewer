@@ -16,6 +16,20 @@ interface CustomWrap {
   dataUrl: string
 }
 
+const sanitizeName = (raw: string) => {
+  const cleaned = (raw || 'wrap')
+    .replace(/[^a-zA-Z0-9 _-]/g, '')
+    .trim() || 'wrap'
+  const base = cleaned.slice(0, 26) // leave room for "-wrap"/.png
+  return base.length ? base : 'wrap'
+}
+
+const fileNameForDownload = (raw: string) => {
+  const base = sanitizeName(raw)
+  const composed = `${base}-wrap`.slice(0, 25) // ensure total <=30 with .png
+  return `${composed}.png`
+}
+
 // Tesla wrap presets from the official repo
 const PRESET_WRAPS = [
   { name: 'Cosmic Burst', file: '/wraps/Cosmic_Burst.png' },
@@ -75,9 +89,10 @@ export function WrapSelector({
       const reader = new FileReader()
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string
+        const safeName = sanitizeName(file.name.replace(/\.[^/.]+$/, ''))
         const customWrap: CustomWrap = {
           id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
+          name: safeName, // stored consistently
           dataUrl: dataUrl
         }
 
@@ -107,14 +122,7 @@ export function WrapSelector({
   const handleDownloadCustomWrap = async (wrap: CustomWrap, e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
     try {
-      const safeName = (() => {
-        const base = (wrap.name || 'custom_wrap')
-          .replace(/[^a-zA-Z0-9 _-]/g, '') // allowed chars
-          .trim()
-          .slice(0, 30)
-          || 'custom_wrap';
-        return `${base}.png`;
-      })();
+      const safeName = fileNameForDownload(wrap.name)
 
       const img = new Image()
       img.crossOrigin = 'anonymous'
