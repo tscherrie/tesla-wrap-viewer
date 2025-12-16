@@ -89,6 +89,7 @@ function App() {
           wrapTexture={wrapTexture}
           solidColor={solidColor}
           playerName={playerName}
+          onRename={setPlayerName}
           onCopyWrap={(wrap, color) => {
             setWrapTexture(wrap)
             setSolidColor(color)
@@ -111,10 +112,7 @@ function App() {
       </Suspense>
 
       {/* UI Overlays */}
-      <Header
-        playerName={playerName}
-        onRename={setPlayerName}
-      />
+      <Header />
       <WrapSelector
         onSelectWrap={setWrapTexture}
         onSelectColor={setSolidColor}

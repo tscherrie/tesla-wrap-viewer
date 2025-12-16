@@ -5,16 +5,18 @@ import * as THREE from 'three'
 import { CarModel } from './CarModel'
 import { useCameraRig } from '../hooks/useCameraRig'
 import { useVehicleAudio } from '../hooks/useVehicleAudio'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Html } from '@react-three/drei'
 
 interface PlayerCarProps {
     wrapTexture: string | null
     solidColor: string | null
     onPositionUpdate: (pos: { position: THREE.Vector3, rotation: THREE.Quaternion, velocity: THREE.Vector3 }) => void
     initialPosition?: [number, number, number]
+    displayName?: string
+    onRename?: () => void
 }
 
-export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPosition = [0, 2, 0] }: PlayerCarProps) {
+export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPosition = [0, 2, 0], displayName, onRename }: PlayerCarProps) {
     const rigidBodyRef = useRef<RapierRigidBody>(null)
     const visualMeshRef = useRef<THREE.Group>(null)
     const orbitControlsRef = useRef<any>(null)
@@ -315,6 +317,17 @@ export function PlayerCar({ wrapTexture, solidColor, onPositionUpdate, initialPo
                 <Suspense fallback={null}>
                     <CarModel wrapTexture={wrapTexture} solidColor={solidColor} />
                 </Suspense>
+                <Html position={[0, 2.2, 0]} center>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onRename?.()
+                        }}
+                        className="px-3 py-1 rounded-full bg-black/70 text-white text-xs border border-white/20 hover:border-white/60 transition-colors"
+                    >
+                        {displayName || 'You'}
+                    </button>
+                </Html>
             </group>
 
             {/* Orbit Controls for Idle Mode - enabled controlled in useFrame */}

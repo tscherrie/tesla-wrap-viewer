@@ -24,10 +24,11 @@ interface GameProps {
     wrapTexture: string | null
     solidColor: string | null
     playerName: string
+    onRename: (name: string) => void
     onCopyWrap: (wrap: string | null, color: string | null) => void
 }
 
-export function Game({ wrapTexture, solidColor, playerName, onCopyWrap }: GameProps) {
+export function Game({ wrapTexture, solidColor, playerName, onRename, onCopyWrap }: GameProps) {
     const [socket, setSocket] = useState<Socket | null>(null)
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
     const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
@@ -251,7 +252,7 @@ export function Game({ wrapTexture, solidColor, playerName, onCopyWrap }: GamePr
                 <ChatBox
                     socket={socket}
                     targetId={activeChatTarget}
-                    targetLabel={players[activeChatTarget]?.displayName || (players[activeChatTarget] ? `Player ${players[activeChatTarget].id.slice(0, 4)}` : undefined)}
+                    targetLabel={players[activeChatTarget] ? `Player ${players[activeChatTarget].id.slice(0, 4)}` : undefined}
                     onClose={() => setActiveChatTarget(null)}
                 />
             )}
@@ -280,6 +281,11 @@ export function Game({ wrapTexture, solidColor, playerName, onCopyWrap }: GamePr
                             solidColor={solidColor}
                             onPositionUpdate={handlePositionUpdate}
                             initialPosition={spawnPosition}
+                            displayName={players[socket?.id || '']?.displayName || playerName}
+                            onRename={() => {
+                                const next = window.prompt('Enter your display name', playerName || 'Player')?.trim()
+                                if (next) onRename(next)
+                            }}
                         />
                         {remoteCars.map(car => (
                             <RemoteCar
@@ -304,28 +310,28 @@ export function Game({ wrapTexture, solidColor, playerName, onCopyWrap }: GamePr
 
             {/* UI Overlays */}
             {selectedPlayer && (
-                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm shadow-2xl rounded-xl px-4 py-3 flex items-center gap-3 z-50 border border-gray-200">
-                    <div className="text-sm font-semibold text-gray-800">
-                        {players[selectedPlayer]?.displayName || `Player ${selectedPlayer.slice(0, 4)}`}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow-lg z-50">
+                    <h3 className="font-bold mb-2">Player {selectedPlayer.slice(0, 4)}</h3>
+                    <div className="flex flex-col gap-2">
+                        <button
+                            className="bg-green-500 text-white px-4 py-2 rounded"
+                            onClick={() => {
+                                const target = players[selectedPlayer];
+                                if (target) {
+                                    onCopyWrap(target.wrapTexture, target.color);
+                                }
+                                setSelectedPlayer(null);
+                            }}
+                        >
+                            Copy Wrap
+                        </button>
+                        <button
+                            className="text-gray-500 text-sm mt-2"
+                            onClick={() => setSelectedPlayer(null)}
+                        >
+                            Close
+                        </button>
                     </div>
-                    <button
-                        className="bg-[#e82127] hover:bg-[#ff2b33] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
-                        onClick={() => {
-                            const target = players[selectedPlayer];
-                            if (target) {
-                                onCopyWrap(target.wrapTexture, target.color);
-                            }
-                            setSelectedPlayer(null);
-                        }}
-                    >
-                        Copy Wrap
-                    </button>
-                    <button
-                        className="text-gray-500 text-xs"
-                        onClick={() => setSelectedPlayer(null)}
-                    >
-                        ✕
-                    </button>
                 </div>
             )}
         </div>

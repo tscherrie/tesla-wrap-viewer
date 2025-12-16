@@ -1,14 +1,4 @@
-interface HeaderProps {
-  playerName: string
-  onRename: (name: string) => void
-}
-
-export function Header({ playerName, onRename }: HeaderProps) {
-  const handleRename = () => {
-    const next = window.prompt('Enter your display name', playerName || 'Player')?.trim()
-    if (next) onRename(next)
-  }
-
+export function Header() {
   return (
     <header className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
       <div className="flex items-center justify-between px-6 py-4">
@@ -43,16 +33,8 @@ export function Header({ playerName, onRename }: HeaderProps) {
             Pan
           </span>
         </div>
-
-        {/* Player name */}
-        <button
-          onClick={handleRename}
-          className="pointer-events-auto text-white/80 hover:text-white text-sm bg-[#1e1e22]/80 border border-[#2a2a30] rounded-full px-3 py-1 transition-colors"
-          title="Click to rename"
-        >
-          You: {playerName || 'Player'}
-        </button>
       </div>
     </header>
   )
 }
+
