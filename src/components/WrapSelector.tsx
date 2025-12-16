@@ -103,6 +103,34 @@ export function WrapSelector({
     onRemoveCustomWrap(id)
   }
 
+  const handleDownloadCustomWrap = async (wrap: CustomWrap, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.src = wrap.dataUrl
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+
+      const canvas = document.createElement('canvas')
+      canvas.width = 1024
+      canvas.height = 1024
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      ctx.drawImage(img, 0, 0, 1024, 1024)
+
+      const pngData = canvas.toDataURL('image/png')
+      const link = document.createElement('a')
+      link.href = pngData
+      link.download = `${wrap.name || 'custom-wrap'}.png`
+      link.click()
+    } catch (err) {
+      console.error('Failed to download wrap', err)
+    }
+  }
+
   return (
     <div className="absolute top-4 right-4 z-10">
       {/* Tutorial Modal */}
@@ -314,6 +342,16 @@ export function WrapSelector({
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                          {/* Download button */}
+                          <button
+                            onClick={(e) => handleDownloadCustomWrap(wrap, e)}
+                            className="absolute top-2 left-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs border border-white/20"
+                            title="Download PNG (1024x1024)"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
                             </svg>
                           </button>
                         </button>
