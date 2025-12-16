@@ -112,7 +112,7 @@ function App() {
       </Suspense>
 
       {/* UI Overlays */}
-      <Header />
+      <Header playerName={playerName} onRename={setPlayerName} />
       <WrapSelector
         onSelectWrap={setWrapTexture}
         onSelectColor={setSolidColor}
