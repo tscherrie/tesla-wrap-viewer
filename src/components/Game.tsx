@@ -25,10 +25,10 @@ interface GameProps {
     solidColor: string | null
     playerName: string
     onRename: (name: string) => void
-    onCopyWrap: (wrap: string | null, color: string | null) => void
+    isNight: boolean
 }
 
-export function Game({ wrapTexture, solidColor, playerName, onRename, onCopyWrap }: GameProps) {
+export function Game({ wrapTexture, solidColor, playerName, onRename, isNight }: GameProps) {
     const [socket, setSocket] = useState<Socket | null>(null)
     const [players, setPlayers] = useState<Record<string, PlayerState>>({})
     const localPlayerPosition = useRef<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
@@ -262,14 +262,14 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, onCopyWrap
                 <Suspense fallback={null}>
                     {/* LIGHTING ENHANCEMENTS */}
                     {/* PBR Reflections - Key for "Tesla" look */}
-                    <Environment preset="city" />
+                    <Environment preset={isNight ? 'night' : 'city'} />
 
-                    {/* Brighter base lighting */}
-                    <ambientLight intensity={1.5} />
-                    {/* Key light for shadows */}
+                    {/* Lighting adjusts for day/night */}
+                    <ambientLight intensity={isNight ? 0.6 : 1.5} color={isNight ? '#a9c4ff' : 'white'} />
                     <directionalLight
-                        position={[100, 100, 50]}
-                        intensity={2}
+                        position={isNight ? [30, 80, -10] : [100, 100, 50]}
+                        intensity={isNight ? 0.9 : 2}
+                        color={isNight ? '#9bb7ff' : 'white'}
                         castShadow
                         shadow-mapSize={[1024, 1024]}
                     />
@@ -297,43 +297,20 @@ export function Game({ wrapTexture, solidColor, playerName, onRename, onCopyWrap
                                 color={car.color}
                                 wrapTexture={car.wrapTexture}
                                 displayName={car.displayName}
+                                selected={selectedPlayer === car.id}
                                 onClick={handleCarClick}
                             />
                         ))}
                     </Physics>
 
                     {/* Environment/Sky - Keep matching background */}
-                    <color attach="background" args={['#87CEEB']} />
-                    <fog attach="fog" args={['#87CEEB', 30, 200]} />
+                    <color attach="background" args={[isNight ? '#0b1224' : '#87CEEB']} />
+                    <fog attach="fog" args={[isNight ? '#0b1224' : '#87CEEB', 30, 200]} />
                 </Suspense>
             </Canvas>
 
             {/* UI Overlays */}
-            {selectedPlayer && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow-lg z-50">
-                    <h3 className="font-bold mb-2">Player {selectedPlayer.slice(0, 4)}</h3>
-                    <div className="flex flex-col gap-2">
-                        <button
-                            className="bg-green-500 text-white px-4 py-2 rounded"
-                            onClick={() => {
-                                const target = players[selectedPlayer];
-                                if (target) {
-                                    onCopyWrap(target.wrapTexture, target.color);
-                                }
-                                setSelectedPlayer(null);
-                            }}
-                        >
-                            Copy Wrap
-                        </button>
-                        <button
-                            className="text-gray-500 text-sm mt-2"
-                            onClick={() => setSelectedPlayer(null)}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* No modal needed; Copy button is above the selected car */}
         </div>
     )
 }

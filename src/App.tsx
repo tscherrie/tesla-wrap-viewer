@@ -7,6 +7,7 @@ import { Header } from './components/Header'
 const STORAGE_KEY = 'tesla-wrap-viewer-custom-wraps'
 const STORAGE_SELECTION_KEY = 'tesla-wrap-viewer-selection'
 const STORAGE_NAME_KEY = 'tesla-wrap-viewer-player-name'
+const STORAGE_THEME_KEY = 'tesla-wrap-viewer-theme'
 
 interface CustomWrap {
   id: string
@@ -19,6 +20,7 @@ function App() {
   const [solidColor, setSolidColor] = useState<string | null>('#e8e8e8') // Pearl White default
   const [customWraps, setCustomWraps] = useState<CustomWrap[]>([])
   const [playerName, setPlayerName] = useState<string>('Player')
+  const [isNight, setIsNight] = useState<boolean>(false)
   const hydrated = useRef(false)
 
   // Load custom wraps from localStorage on mount
@@ -40,6 +42,15 @@ function App() {
       const storedName = localStorage.getItem(STORAGE_NAME_KEY)
       if (storedName) {
         setPlayerName(storedName)
+      }
+
+      const storedTheme = localStorage.getItem(STORAGE_THEME_KEY)
+      if (storedTheme) {
+        setIsNight(storedTheme === 'night')
+      } else {
+        // Basic heuristic fallback until geolocation finishes
+        const hour = new Date().getHours()
+        setIsNight(hour < 6 || hour >= 19)
       }
       hydrated.current = true
     } catch (error) {
@@ -78,6 +89,36 @@ function App() {
     }
   }, [playerName])
 
+  // Persist theme
+  useEffect(() => {
+    if (!hydrated.current) return
+    try {
+      localStorage.setItem(STORAGE_THEME_KEY, isNight ? 'night' : 'day')
+    } catch (error) {
+      console.error('Failed to save theme:', error)
+    }
+  }, [isNight])
+
+  // Auto-set theme based on local sunrise/sunset (best effort)
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords
+      const url = `https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status !== 'OK') return
+          const now = Date.now()
+          const sunrise = new Date(data.results.sunrise).getTime()
+          const sunset = new Date(data.results.sunset).getTime()
+          const night = now < sunrise || now > sunset
+          setIsNight(night)
+        })
+        .catch(() => { /* ignore */ })
+    }, () => { /* ignore permission errors */ })
+  }, [])
+
   const handleAddCustomWrap = (wrap: CustomWrap) => {
     setCustomWraps(prev => [...prev, wrap])
   }
@@ -95,29 +136,15 @@ function App() {
           solidColor={solidColor}
           playerName={playerName}
           onRename={setPlayerName}
-          onCopyWrap={(wrap, color) => {
-            setWrapTexture(wrap)
-            setSolidColor(color)
-
-            // Check if copied wrap is a custom Data URI
-            if (wrap && wrap.startsWith('data:image')) {
-              // Check if we already have it (simple dedup by string comparison might be heavy, but safe)
-              const exists = customWraps.some(w => w.dataUrl === wrap)
-              if (!exists) {
-                const newWrap: CustomWrap = {
-                  id: `copied-${Date.now()}`,
-                  name: `Copied Wrap ${new Date().toLocaleTimeString()}`,
-                  dataUrl: wrap
-                }
-                handleAddCustomWrap(newWrap)
-              }
-            }
-          }}
+          isNight={isNight}
         />
       </Suspense>
 
       {/* UI Overlays */}
-      <Header />
+      <Header
+        isNight={isNight}
+        onToggleTheme={() => setIsNight(prev => !prev)}
+      />
       <WrapSelector
         onSelectWrap={setWrapTexture}
         onSelectColor={setSolidColor}

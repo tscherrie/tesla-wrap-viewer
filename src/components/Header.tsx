@@ -1,4 +1,9 @@
-export function Header() {
+interface HeaderProps {
+  isNight: boolean
+  onToggleTheme: () => void
+}
+
+export function Header({ isNight, onToggleTheme }: HeaderProps) {
   return (
     <header className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
       <div className="flex items-center justify-between px-6 py-4">
@@ -25,6 +30,13 @@ export function Header() {
           </div>
         </div>
 
+        <button
+          onClick={onToggleTheme}
+          className="pointer-events-auto text-white/80 hover:text-white text-sm bg-[#1e1e22]/80 border border-[#2a2a30] rounded-full px-3 py-1 transition-colors"
+          title="Toggle day/night"
+        >
+          {isNight ? 'Switch to Day' : 'Switch to Night'}
+        </button>
       </div>
     </header>
   )

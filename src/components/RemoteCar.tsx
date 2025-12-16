@@ -13,9 +13,10 @@ interface RemoteCarProps {
     wrapTexture: string | null
     displayName?: string
     onClick: (id: string) => void
+    selected?: boolean
 }
 
-export function RemoteCar({ id, position, rotation, color, wrapTexture, displayName, onClick }: RemoteCarProps) {
+export function RemoteCar({ id, position, rotation, color, wrapTexture, displayName, selected, onClick }: RemoteCarProps) {
     const groupRef = useRef<THREE.Group>(null)
 
     useFrame(() => {
@@ -48,6 +49,19 @@ export function RemoteCar({ id, position, rotation, color, wrapTexture, displayN
                     {displayName || `Player ${id.slice(0, 4)}`}
                 </div>
             </Html>
+            {selected && (
+                <Html position={[0, 3, 0]} center>
+                    <button
+                        className="bg-[#e82127] hover:bg-[#ff2b33] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg shadow-[#e82127]/30"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onClick(id)
+                        }}
+                    >
+                        Copy Wrap
+                    </button>
+                </Html>
+            )}
         </group>
     )
 }
